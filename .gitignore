@@ -1,0 +1,30 @@
+# ignore everything
+*
+
+# whitelist top level directories
+!/*
+
+# global whitelisting
+!**/.gitignore
+!**/docker-compose.yaml
+!**/README.md
+
+# specific whitelisting
+
+!grafana/provisioning/
+!grafana/provisioning/**
+
+!homer/assets/
+!homer/assets/config.yaml
+
+!prometheus/config/
+!prometheus/config/*
+
+!tick/telegraf/
+!tick/telegraf/*
+
+!traefik/authelia/
+!traefik/authelia/configuration.yml
+
+!traefik/dynamic/
+!traefik/dynamic/*

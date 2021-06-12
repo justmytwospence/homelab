@@ -1,0 +1,33 @@
+version: "3"
+
+networks:
+
+  default:
+    name: grafana-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:8.0.0
+    restart: unless-stopped
+    environment:
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/home.json
+      GF_INSTALL_PLUGINS: flant-statusmap-panel
+      GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.grafana.middlewares: authelia
+      traefik.http.services.grafana.loadbalancer.server.port: 3000
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      # these directories need to be 472:root permissioned
+      - ./provisioning/:/etc/grafana/provisioning
+      - ./data:/var/lib/grafana

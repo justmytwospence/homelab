@@ -1,0 +1,102 @@
+version: "3"
+
+networks:
+
+  default:
+    name: prometheus-net
+
+  grafana-net:
+    external:
+      name: grafana-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  cadvisor:
+    container_name: cadvisor
+    image: google/cadvisor:v0.33.0
+    restart: unless-stopped
+    command:
+      - --alsologtostderr=true
+      - --disable_metrics=percpu,disk,tcp,udp,sched,process
+      - --docker=tcp://cadvisor-docker-proxy:2375
+      - --docker_only
+      # - --global_housekeeping_interval=1m
+      # - --housekeeping_interval=30s
+      # - --max_procs=2
+      # - --v=0
+    depends_on:
+      docker-proxy:
+        condition: service_started
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    labels:
+      traefik.enable: true
+      traefik.http.routers.cadvisor.middlewares: authelia, whitelist-lan@file
+      traefik.http.services.cadvisor.loadbalancer.server.port: 8080
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - /:/rootfs:ro
+      - /dev/disk:/dev/disk:ro
+      - /sys:/sys:ro
+      - /var/run:/var/run:ro
+
+  docker-proxy:
+    container_name: cadvisor-docker-proxy
+    image: ghcr.io/tecnativa/docker-socket-proxy:0.1
+    restart: unless-stopped
+    environment:
+      # LOG_LEVEL: debug
+      CONTAINERS: 1
+      IMAGES: 1
+      INFO: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  ping-exporter:
+    container_name: ping-exporter
+    image: prom/blackbox-exporter:v0.18.0
+    restart: unless-stopped
+    command:
+      - --config.file=/ping-exporter.yaml
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config/ping-exporter.yaml:/ping-exporter.yaml
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.27.1
+    restart: unless-stopped
+    user: "${PUID}"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
+      - --log.level=debug
+      - --web.enable-admin-api
+      - --web.external-url="https://prometheus.${DOMAIN}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.prometheus-api.middlewares: whitelist-lan@file
+      traefik.http.routers.prometheus-api.rule: Host(`prometheus.${DOMAIN}`) && PathPrefix(`/api`)
+      traefik.http.routers.prometheus.middlewares: authelia, whitelist-lan@file
+      traefik.http.services.prometheus.loadbalancer.server.port: 9090
+    networks:
+      - default
+      - grafana-net
+      - traefik-net
+    volumes:
+      - ./config:/etc/prometheus/
+      - ./data:/prometheus
+
+  speedtest-exporter:
+    container_name: speedtest-exporter
+    image: miguelndecarvalho/speedtest-exporter:v3.1
+    restart: unless-stopped
+    environment:
+      SPEEDTEST_PORT: 9798

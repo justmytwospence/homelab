@@ -1,0 +1,44 @@
+version: "3"
+
+networks:
+
+  default:
+    name: photostructure-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  photostructure:
+    container_name: photostructure
+    image: photostructure/server:stable
+    restart: unless-stopped
+    environment:
+      PS_COPY_ASSETS_TO_LIBRARY: "false"
+      PS_FORCE_LOCAL_DB_REPLICA: "true"
+      PS_LIBRARY: /ps/library
+      PS_LOG_COLOR: "true"
+      PS_LOG_LEVEL: debug
+    labels:
+      traefik.enable: true
+      traefik.http.routers.photostructure.middlewares: authelia, error-pages
+      traefik.http.services.photostructure.loadbalancer.server.port: 1787
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./cache:/ps/tmp
+      - ./config:/ps/config
+      - /var/log/photostructure:/ps/logs
+      - photos:/ps/library
+
+volumes:
+
+  photos:
+    driver: local
+    driver_opts:
+      device: :/Photos
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

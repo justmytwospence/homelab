@@ -1,0 +1,116 @@
+version: "3"
+
+networks:
+
+  default:
+    name: tick-net
+
+  grafana-net:
+    external:
+      name: grafana-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  chronograf:
+    container_name: chronograf
+    image: chronograf:1.8
+    restart: unless-stopped
+    depends_on:
+      influxdb:
+        condition: service_started
+    environment:
+      INFLUXDB_URL: http://influxdb:8086
+      KAPACITOR_URL: http://kapacitor:9092
+    labels:
+      traefik.enable: true
+      traefik.http.routers.chronograf.middlewares: authelia
+      traefik.http.services.chronograf.loadbalancer.server.port: 8888
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./chronograf:/var/lib/chronograf
+
+  docker-proxy:
+    container_name: telegraf-docker-proxy
+    image: ghcr.io/tecnativa/docker-socket-proxy:0.1
+    restart: unless-stopped
+    environment:
+      # LOG_LEVEL: debug
+      CONTAINERS: 1
+      IMAGES: 1
+      INFO: 1
+      NETWORKS: 1
+      VOLUMES: 1
+    ports:
+      - 2376:2375 # must be exposed because telegraf is on the host network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  influxdb:
+    container_name: influxdb
+    image: influxdb:2.0
+    restart: unless-stopped
+    environment:
+      # INFLUXD_LOG_LEVEL: debug
+      INFLUX_PASSWORD: "${INFLUX_PASSWORD}"
+      INFLUX_USERNAME: "${INFLUX_USERNAME}"
+      INFLUXD_REPORTING_DISABLED: "true"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.influxdb.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.services.influxdb.loadbalancer.server.port: 8086
+    networks:
+      - default
+      - grafana-net
+      - traefik-net
+    ports:
+      - 8086:8086 # must be exposed because telegraf is on the host network
+    volumes:
+      - ./influxdb:/var/lib/influxdb2
+      - /var/log/influxdb:/var/log
+
+  kapacitor:
+    container_name: kapacitor
+    image: kapacitor:1.5
+    restart: unless-stopped
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+      KAPACITOR_LOGGING_LEVEL: INFO
+      KAPACITOR_REPORTING_ENABLED: "false"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.kapacitor.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.services.kapacitor.loadbalancer.server.port: 9092
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./kapacitor:/etc/kapacitor
+
+  telegraf:
+    container_name: telegraf
+    image: telegraf:1.18
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      docker-proxy:
+        condition: service_started
+      influxdb:
+        condition: service_started
+    environment:
+      HOST_ETC: /hostfs/etc
+      HOST_MOUNT_PREFIX: /hostfs
+      HOST_PROC: /hostfs/proc
+      HOST_RUN: /hostfs/run
+      HOST_SYS: /hostfs/sys
+      HOST_VAR: /hostfs/var
+      INFLUX_TOKEN: "${INFLUX_TOKEN}"
+    volumes:
+      - ./telegraf:/etc/telegraf
+      - /:/hostfs:ro

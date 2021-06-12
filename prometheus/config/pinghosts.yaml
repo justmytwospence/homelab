@@ -1,0 +1,3 @@
+- targets:  # url;humanname
+  - http://traefik:8080/ping;Internally;internal;internetbox
+  - https://ping.spencerboucher.com;Externally;external;internetbox

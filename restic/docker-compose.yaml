@@ -1,0 +1,19 @@
+version: "3"
+
+networks:
+
+  default:
+    name: restic-net
+
+services:
+
+  restic:
+    container_name: restic
+    image: lobaro/restic-backup-docker:latest
+    restart: unless-stopped
+    environment:
+      RESTIC_PASSWORD:
+      RESTIC_REPOSITORY:
+    volumes:
+      - /mnt/ssd1/nextcloud:/data/nextcloud
+

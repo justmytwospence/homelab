@@ -1,0 +1,45 @@
+version: "3"
+
+networks:
+
+  default:
+    name: yacht-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  docker-proxy:
+    container_name: yacht-docker-proxy
+    image: ghcr.io/tecnativa/docker-socket-proxy:0.1
+    restart: unless-stopped
+    environment:
+      # LOG_LEVEL: debug
+      CONTAINERS: 1
+      IMAGES: 1
+      NETWORKS: 1
+      VOLUMES: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  yacht:
+    container_name: yacht
+    image: selfhostedpro/yacht:latest
+    restart: unless-stopped
+    depends_on:
+      docker-proxy:
+        condition: service_started
+    environment:
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      DOCKER_HOST: tcp://yacht-docker-proxy:2375
+    labels:
+      traefik.enable: true
+      traefik.http.routers.yacht.middlewares: authelia, whitelist-lan@file
+      traefik.http.services.yacht.loadbalancer.server.port: 8000
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/config

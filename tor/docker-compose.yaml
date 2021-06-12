@@ -1,0 +1,30 @@
+version: "3"
+
+networks:
+
+  default:
+    name: tor-net
+
+services:
+
+  obfs4-bridge:
+    image: thetorproject/obfs4-bridge:latest
+    container_name: tor
+    restart: unless-stopped
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == QNAP
+    environment:
+      EMAIL: ${EMAIL}
+      OR_PORT: ${OR_PORT}
+      PT_PORT: ${PT_PORT}
+    ports:
+      - ${OR_PORT}:${OR_PORT}
+      - ${PT_PORT}:${PT_PORT}
+    volumes:
+      - data:/var/lib/tor
+
+volumes:
+  data:
+    name: tor-datadir-${OR_PORT}-${PT_PORT}

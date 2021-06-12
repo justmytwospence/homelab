@@ -1,0 +1,43 @@
+version: "3"
+
+networks:
+
+  default:
+    name: syncthing-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  syncthing:
+    container_name: syncthing
+    image: linuxserver/syncthing:latest
+    restart: unless-stopped
+    environment:
+      PGID: ${PGID}
+      PUID: ${PUID}
+      TZ: ${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.services.syncthing.loadbalancer.server.port: 8384
+    networks:
+      - default
+      - traefik-net
+    ports:
+      - 8384:8384
+      - 21027:21027/udp
+      - 22000:22000
+    volumes:
+      - ./config:/config
+      - syncthing:/data
+
+volumes:
+
+  syncthing:
+    driver: local
+    driver_opts:
+      device: :/Syncthing
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

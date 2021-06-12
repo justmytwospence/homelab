@@ -1,0 +1,24 @@
+# dockers -> registrators -> consul -> traefik
+version: "3"
+
+services:
+
+  consul:
+    container_name: consul
+    image: consul
+    restart: unless-stopped
+    command: consul agent -server -dev -ui -bootstrap -log-level debug
+    ports:
+      - 8400:8400
+      - 8500:8500
+      - 8600:8600
+
+  registrator:
+    container_name: registrator
+    image: gliderlabs/registrator:latest
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - consul
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock

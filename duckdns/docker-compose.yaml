@@ -1,0 +1,22 @@
+version: "3"
+
+networks:
+
+  default:
+    name: duckdns-net
+
+services:
+
+  duckdns:
+    container_name: duckdns
+    image: linuxserver/duckdns:latest
+    restart: unless-stopped
+    environment:
+      LOG_FILE: "true"
+      PGID: ${PGID}
+      PUID: ${PUID}
+      SUBDOMAINS: ${SUBDOMAINS}
+      TOKEN: ${TOKEN}
+      TZ: ${TZ}
+    volumes:
+      - ./config:/config

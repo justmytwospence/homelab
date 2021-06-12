@@ -1,0 +1,31 @@
+version: "3"
+
+networks:
+
+  default:
+    name: pigallery-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  pigallery:
+    container_name: pigallery
+    image: bpatrik/pigallery2:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    labels:
+      traefik.enable: true
+      traefik.http.routers.pigallery.middlewares: error-pages
+      traefik.http.services.pigallery.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/app/data/config
+      - ./db:/app/data/db
+      - ./images:/app/data/images
+      - ./tmp:/app/data/tmp

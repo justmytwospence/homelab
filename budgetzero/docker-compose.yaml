@@ -1,0 +1,24 @@
+version: "3"
+
+networks:
+
+  default:
+    name: budgetzero-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  budgetzero:
+    container_name: budgetzero
+    image: budgetzero/budgetzero:latest
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.budgetzero.middlewares: authelia
+      traefik.http.services.budgetzero.loadbalancer.server.port: 8080
+    networks:
+      - default
+      - traefik-net

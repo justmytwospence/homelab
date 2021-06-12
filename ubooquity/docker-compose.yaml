@@ -1,0 +1,50 @@
+version: "3"
+
+networks:
+
+  default:
+    name: ubooquity-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  ubooquity:
+    container_name: ubooquity
+    image: linuxserver/ubooquity:latest
+    restart: unless-stopped
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    labels:
+      traefik.enable: true
+      # UI
+      traefik.http.routers.ubooquity.middlewares: authelia
+      traefik.http.routers.ubooquity.service: ubooquity
+      traefik.http.services.ubooquity.loadbalancer.server.port: 2202
+      # OPDS
+      traefik.http.routers.ubooquity-opds.rule: Host(`ubooquity.${DOMAIN}`) && PathPrefix(`/opds-books`, `/opds-comics`)
+      traefik.http.routers.ubooquity-opds.service: ubooquity
+      # admin UI
+      traefik.http.routers.ubooquity-admin-path.middlewares: authelia
+      traefik.http.routers.ubooquity-admin-path.rule: Host(`ubooquity.${DOMAIN}`) && PathPrefix(`/admin`, `/admin-res`)
+      traefik.http.routers.ubooquity-admin-path.service: ubooquity-admin
+      traefik.http.services.ubooquity-admin.loadbalancer.server.port: 2203
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/config
+      - books:/books
+
+volumes:
+
+  books:
+    driver: local
+    driver_opts:
+      device: :/Books
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

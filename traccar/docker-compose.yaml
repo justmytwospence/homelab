@@ -1,0 +1,26 @@
+version: "3"
+
+networks:
+
+  default:
+    name: traccar-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  traccar:
+    container_name: traccar
+    image: traccar/traccar:latest
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.services.traccar.loadbalancer.server.port: 8082
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+      - /var/log/traccar:/opt/traccar/logs:rw

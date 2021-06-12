@@ -1,0 +1,41 @@
+version: "3"
+
+networks:
+
+  default:
+    name: jellyfin-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  jellyfin:
+    container_name: jellyfin
+    image: linuxserver/jellyfin:latest
+    restart: unless-stopped
+    devices:
+      - /dev/dri:/dev/dri     # VAAPI
+      - /dev/vchiq:/dev/vchiq # OMX
+    environment:
+      JELLYFIN_PublishedServerUrl: "${PublishedServerURL}:8096"
+      PGID: ${PGID}
+      PUID: ${PUID}
+      TZ: ${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.services.jellyfin.loadbalancer.server.port: 8096
+    networks:
+      - default
+      - traefik-net
+    ports:
+      # - 1900:1900/udp # dlna
+      # - 7359:7359/udp # dlna
+      - 8096:8096     # http
+      # - 8920:8920     # https
+    volumes:
+      - ./config:/config
+      - /mnt/ssd1/movies:/movies
+      - /mnt/ssd1/tv:/tv
+      - /opt/vc/lib:/opt/vc/lib

@@ -1,0 +1,39 @@
+version: "3"
+
+networks:
+
+  default:
+    name: radicale-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  radicale:
+    container_name: radicale
+    image: tomsquest/docker-radicale:latest
+    init: true
+    read_only: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - KILL
+      - SETGID
+      - SETUID
+    healthcheck:
+      test: curl -f http://127.0.0.1:5232 || exit 1
+    labels:
+      traefik.enable: true
+      traefik.http.services.radicale.loadbalancer.server.port: 5232
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/etc/radicate/config
+      - ./data:/data

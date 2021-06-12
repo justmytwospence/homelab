@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+
+  calibre:
+    container_name: calibre
+    image: linuxserver/calibre:latest
+    restart: unless-stopped
+    ports:
+      - 9080:8080 # web
+      - 9081:8081 # server
+      - 9090:9090 # local
+    volumes:
+      - "/share/Calibre Library:/config/Calibre Library"
+      - ./calibre:/config

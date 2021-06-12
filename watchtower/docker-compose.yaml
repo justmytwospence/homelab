@@ -1,0 +1,61 @@
+version: "3"
+
+networks:
+
+  default:
+    name: watchtower-net
+
+  prometheus-net:
+    external:
+      name: prometheus-net
+
+services:
+
+  docker-proxy:
+    container_name: watchtower-docker-proxy
+    image: ghcr.io/tecnativa/docker-socket-proxy:0.1
+    restart: unless-stopped
+    environment:
+      # LOG_LEVEL: debug
+      CONTAINERS: 1
+      IMAGES: 1
+      NETWORKS: 1
+      POST: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    depends_on:
+      docker-proxy:
+        condition: service_started
+    environment:
+      # WATCHTOWER_DEBUG: "true"
+      # WATCHTOWER_RUN_ONCE: "true"
+      DOCKER_CONFIG: /config
+      DOCKER_HOST: tcp://watchtower-docker-proxy:2375
+      TZ: ${TZ}
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_HTTP_API_METRICS: "true"
+      WATCHTOWER_HTTP_API_TOKEN: ${HTTP_API_TOKEN}
+      WATCHTOWER_INCLUDE_STOPPED: "true"
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+      WATCHTOWER_NOTIFICATION_EMAIL_FROM: ${NOTIFICATION_EMAIL_FROM}
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER: ${NOTIFICATION_EMAIL_SERVER}
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD: ${NOTIFICATION_EMAIL_SERVER_PASSWORD}
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT: 587
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER: ${NOTIFICATION_EMAIL_SERVER_USER}
+      WATCHTOWER_NOTIFICATION_EMAIL_TO: ${NOTIFICATION_EMAIL_TO}
+      WATCHTOWER_NOTIFICATIONS: email
+      WATCHTOWER_NOTIFICATIONS_LEVEL: info
+      WATCHTOWER_ROLLING_RESTART: "true"
+      WATCHTOWER_SCHEDULE: 0 0 4 * * *
+      WATCHTOWER_TIMEOUT: 60s
+      WATCHTOWER_WARN_ON_HEAD_FAILURE: auto
+    networks:
+      - default
+      - prometheus-net
+    volumes:
+      - ./config:/config

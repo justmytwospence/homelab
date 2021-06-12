@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+
+  samba:
+    container_name: samba
+    image: dperson/samba:latest
+    network_mode: host
+    read_only: false
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    environment:
+      # GENERIC: section;parameter
+      # SHARE: name;path;browse;readonly;guest;users;admins;writelist;comment
+      GLOBAL1: "log level = 3"
+      GROUPID: ${GUID}
+      NMBD: "true"
+      SHARE1: "tv;/tv;yes;no;no"
+      SHARE2: "movies;/movies;yes;no;no"
+      SHARE3: "books;/books;yes;no;no"
+      TZ: ${TZ}
+      USER: "pi;${PASSWORD}"
+      USERID: ${PUID}
+      WORKGROUP: "WORKGROUP"
+    volumes:
+      - /mnt/ssd1/books:/books:z
+      - /mnt/ssd1/movies:/movies:z
+      - /mnt/ssd1/tv:/tv:z

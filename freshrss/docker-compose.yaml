@@ -1,0 +1,68 @@
+version: "3"
+
+networks:
+
+  default:
+    name: freshrss-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  freshrss:
+    container_name: freshrss
+    image: freshrss/freshrss:latest-arm
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      CRON_MIN: '*/20'
+      FRESHRSS_ENV: development
+      FRESHRSS_INSTALL: |-
+        --api_enabled
+        --auth_type form
+        --base_url ${URL}
+        --db-base freshrss
+        --db-host freshrss-db:5432
+        --db-password ${DB_PW}
+        --db-type pgsql
+        --db-user freshrss
+        --default_user freshrss
+        --environment development
+        --language en
+      FRESHRSS_USER: |-
+        --api_password ${API_PW}
+        --email ${EMAIL}
+        --language en
+        --password ${PW}
+        --user ${USERNAME}
+      TZ: America/Denver
+    labels:
+      traefik.enable: true
+      traefik.http.routers.freshrss.middlewares: authelia
+      traefik.http.services.freshrss.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./app:/var/www/FreshRSS/data
+      - ./extensions:/var/www/FreshRSS/extensions
+
+  db:
+    container_name: freshrss-db
+    image: postgres:13.2
+    restart: always
+    healthcheck:
+      interval: 10s
+      retries: 10
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      timeout: 45s
+    environment:
+      POSTGRES_USER: freshrss
+      POSTGRES_PASSWORD: ${DB_PW}
+      POSTGRES_DB: freshrss
+    volumes:
+      - ./db:/var/lib/postgresql/data

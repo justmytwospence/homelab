@@ -1,0 +1,209 @@
+version: "3"
+
+networks:
+
+  default:
+    name: umbrel_main_network
+    ipam:
+      driver: default
+      config:
+        - subnet: "$NETWORK_IP/24"
+
+services:
+
+  tor:
+    container_name: tor
+    image: lncm/tor:0.4.5.7@sha256:a83e0d9fd1a35adf025f2f34237ec1810e2a59765988dce1dfb222ca8ef6583c
+    restart: on-failure
+    user: toruser
+    networks:
+      default:
+        ipv4_address: $TOR_PROXY_IP
+    ports:
+      - "127.0.0.1:$TOR_PROXY_PORT:$TOR_PROXY_PORT"
+    volumes:
+      - ${PWD}/tor/data:/var/lib/tor/
+      - ${PWD}/tor/run:/var/run/tor/
+      - ${PWD}/tor/torrc:/etc/tor/torrc
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.17.8@sha256:380eb808e2a3b0dd954f92c1cae2f845e6558a15037efefcabc5b4e03d666d03
+    restart: on-failure
+    stop_grace_period: 30s
+    depends_on:
+      - dashboard
+      - manager
+    networks:
+      default:
+        ipv4_address: $NGINX_IP
+    ports:
+      - "${NGINX_PORT}:80"
+    volumes:
+      - ${PWD}/nginx:/etc/nginx
+
+  bitcoin:
+    container_name: bitcoin
+    image: lncm/bitcoind:v0.21.1@sha256:5bedb46d698de16c59e9e43d31485d0d82239bd437d62ac7cf47ebb633214f37
+    restart: on-failure
+    stop_grace_period: 15m30s
+    depends_on:
+      - manager
+      - nginx
+      - tor
+    networks:
+      default:
+        ipv4_address: $BITCOIN_IP
+    ports:
+      - "$BITCOIN_P2P_PORT:$BITCOIN_P2P_PORT"
+    volumes:
+      - ${PWD}/bitcoin:/data/.bitcoin
+
+  lnd:
+    container_name: lnd
+    image: lncm/lnd:v0.12.1@sha256:bdc442c00bc4dd4d5bfa42efd7d977bfe4d21a08d466c933b9cff7cfc83e0c0e
+    restart: on-failure
+    stop_grace_period: 5m30s
+    depends_on:
+      - tor
+      - manager
+    networks:
+      default:
+        ipv4_address: $LND_IP
+    ports:
+      - "9735:9735"
+      - "$LND_REST_PORT:$LND_REST_PORT"
+      - "$LND_GRPC_PORT:$LND_GRPC_PORT"
+    volumes:
+      - ${PWD}/lnd:/data/.lnd
+
+  dashboard:
+    container_name: dashboard
+    image: getumbrel/dashboard:v0.3.22@sha256:144105c0b7b6717f22e18171eec481897bb96344c7c298c681c9c04ce2b764a6
+    restart: on-failure
+    stop_grace_period: 1m30s
+    networks:
+      default:
+        ipv4_address: $DASHBOARD_IP
+
+  manager:
+    container_name: manager
+    image: getumbrel/manager:v0.2.12@sha256:1d9dc50743b10c7f57f0514a50932e4c99e5a77616ef24ecd1f9826b6085b8fc
+    depends_on: [ tor ]
+    restart: on-failure
+    stop_grace_period: 5m30s
+    environment:
+      BACKUP_STATUS_FILE: "/statuses/backup-status.json"
+      BITCOIN_P2P_HIDDEN_SERVICE_FILE: "/var/lib/tor/bitcoin-p2p/hostname"
+      BITCOIN_P2P_PORT: $BITCOIN_P2P_PORT
+      BITCOIN_RPC_HIDDEN_SERVICE_FILE: "/var/lib/tor/bitcoin-rpc/hostname"
+      BITCOIN_RPC_PASSWORD: $BITCOIN_RPC_PASS
+      BITCOIN_RPC_PORT: $BITCOIN_RPC_PORT
+      BITCOIN_RPC_USER: $BITCOIN_RPC_USER
+      DEBUG_STATUS_FILE: "/statuses/debug-status.json"
+      DEVICE_HOSTNAME: ${DEVICE_HOSTNAME:-""}
+      DEVICE_HOSTS: ${DEVICE_HOSTS:-"http://umbrel.local"}
+      DOCKER_COMPOSE_DIRECTORY: $PWD
+      GITHUB_REPO: "getumbrel/umbrel"
+      JWT_EXPIRATION: "3600"
+      JWT_PRIVATE_KEY_FILE: "/jwt-private-key/jwt.key"
+      JWT_PUBLIC_KEY_FILE: "/jwt-public-key/jwt.pem"
+      LND_ADMIN_MACAROON_FILE: "/lnd/data/chain/bitcoin/${BITCOIN_NETWORK}/admin.macaroon"
+      LND_CERT_FILE: "/lnd/tls.cert"
+      LND_GRPC_HIDDEN_SERVICE_FILE: "/var/lib/tor/lnd-grpc/hostname"
+      LND_REST_HIDDEN_SERVICE_FILE: "/var/lib/tor/lnd-rest/hostname"
+      MIDDLEWARE_API_URL: "http://$MIDDLEWARE_IP"
+      PORT: "3006"
+      REBOOT_SIGNAL_FILE: "/signals/reboot"
+      SHUTDOWN_SIGNAL_FILE: "/signals/shutdown"
+      TOR_HIDDEN_SERVICE_DIR: "/var/lib/tor"
+      TOR_PROXY_IP: "${TOR_PROXY_IP}"
+      TOR_PROXY_PORT: "${TOR_PROXY_PORT}"
+      UMBREL_DASHBOARD_HIDDEN_SERVICE_FILE: "/var/lib/tor/web/hostname"
+      UMBREL_SEED_FILE: "/db/umbrel-seed/seed"
+      UMBREL_VERSION_FILE: "/info.json"
+      UPDATE_LOCK_FILE: "/statuses/update-in-progress"
+      UPDATE_SIGNAL_FILE: "/signals/update"
+      UPDATE_STATUS_FILE: "/statuses/update-status.json"
+      USER_PASSWORD_FILE: "/db/user.json"
+    networks:
+      default:
+        ipv4_address: $MANAGER_IP
+    volumes:
+      - ${DOCKER_BINARY:-/usr/bin/docker}:/usr/bin/docker
+      - ${PWD}/apps:/apps
+      - ${PWD}/db:/db
+      - ${PWD}/events/signals:/signals
+      - ${PWD}/info.json:/info.json
+      - ${PWD}/lnd:/lnd:ro
+      - ${PWD}/statuses:/statuses
+      - ${PWD}/tor/data:/var/lib/tor/
+      - ${PWD}:${PWD}
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jwt-private-key:/jwt-private-key
+      - jwt-public-key:/jwt-public-key
+
+  middleware:
+    command: ["./wait-for-node-manager.sh", $MANAGER_IP, "npm", "start"]
+    container_name: middleware
+    depends_on:
+      - bitcoin
+      - lnd
+      - manager
+    image: getumbrel/middleware:v0.1.10@sha256:ff3d5929a506739286f296c803105cca9d83e73e9eb1b7c6833533e345d77736
+    restart: on-failure
+    environment:
+      BITCOIN_HOST: $BITCOIN_IP
+      DEVICE_HOSTS: ${DEVICE_HOSTS:-"http://umbrel.local"}
+      JWT_PUBLIC_KEY_FILE: "/jwt-public-key/jwt.pem"
+      LND_HOST: "${LND_IP}"
+      LND_NETWORK: $BITCOIN_NETWORK
+      PORT: "3005"
+      RPC_PASSWORD: $BITCOIN_RPC_PASS
+      RPC_PORT: $BITCOIN_RPC_PORT
+      RPC_USER: $BITCOIN_RPC_USER
+    networks:
+      default:
+        ipv4_address: $MIDDLEWARE_IP
+    volumes:
+      - ${PWD}/lnd:/lnd
+      - jwt-public-key:/jwt-public-key
+
+  neutrino-switcher:
+    container_name: neutrino-switcher
+    depends_on:
+      - bitcoin
+      - lnd
+    image: getumbrel/neutrino-switcher:v1.3.0@sha256:399ccea7f39129ff16c9c408f9e68a01dd4671f428273f3c3f401a8a0d2f7ddc
+    restart: on-failure
+    environment:
+      JSONRPCURL: "http://${BITCOIN_IP}:${BITCOIN_RPC_PORT}"
+      LND_CONTAINER_NAME: lnd
+      RPCPASS: $BITCOIN_RPC_PASS
+      RPCUSER: $BITCOIN_RPC_USER
+      SLEEPTIME: 3600
+    networks:
+      default:
+        ipv4_address: $NEUTRINO_SWITCHER_IP
+    volumes:
+      - ${PWD}/lnd:/lnd
+      - ${PWD}/statuses:/statuses
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  electrs:
+    container_name: electrs
+    image: getumbrel/electrs:v0.8.9@sha256:592fb50cdf16fa2b2e20f7c0a28d4a132c2ee636d89d4b9c24f14886763b5478
+    restart: on-failure
+    stop_grace_period: 5m
+    networks:
+      default:
+        ipv4_address: $ELECTRUM_IP
+    volumes:
+      - ${PWD}/bitcoin:/data/.bitcoin:ro
+      - ${PWD}/electrs:/data
+    ports:
+      - "$ELECTRUM_PORT:$ELECTRUM_PORT"
+
+volumes:
+  jwt-public-key:
+  jwt-private-key:

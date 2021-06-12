@@ -1,0 +1,26 @@
+version: "3"
+
+networks:
+
+  default:
+    name: duplicati-net
+
+services:
+
+  duplicati:
+    container_name: duplicati
+    image: linuxserver/duplicati:latest
+    restart: unless-stopped
+    environment:
+      AUTH_PASSWORD: ${AUTH_PASSWORD}
+      AUTH_USERNAME: ${AUTH_USERNAME}
+      CLI_ARGS: ${BACKUP_TARGET}
+      PGID: ${PGID}
+      PUID: ${PUID}
+      TZ: ${TZ}
+    ports:
+      - 8200:8200
+    volumes:
+      - ./config:/config
+      - ./source:/source
+      - /mnt/ssd1/nextcloud:/backups/nextcloud

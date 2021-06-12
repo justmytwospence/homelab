@@ -1,0 +1,52 @@
+version: "3"
+
+networks:
+
+  default:
+    name: ttrss-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  db:
+    container_name: ttrss-db
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DB_PW}
+    volumes:
+      - ./db/data/:/var/lib/postgresql/data
+
+  mercury:
+    container_name: ttrss-mercury
+    image: wangqiru/mercury-parser-api:latest
+    restart: always
+    networks:
+      - default
+      - traefik-net
+
+  ttrss:
+    container_name: ttrss
+    image: wangqiru/ttrss:latest
+    restart: always
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+    environment:
+      SELF_URL_PATH: ${URL}
+      DB_PASS: ${DB_PW}
+      DB_HOST: ttrss-db
+      PUID: ${PUID}
+      PGID: ${PGID}
+    networks:
+      - default
+      - traefik-net
+    ports:
+      - 181:80
+    volumes:
+      # - ./app:/var/www
+      - ./feed-icons:/var/www/feed-icons

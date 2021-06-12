@@ -1,0 +1,50 @@
+version: "3"
+
+networks:
+
+  default:
+    name: nginx-proxy-manager-net
+
+  nginx-net:
+    name: nginx-net
+
+services:
+
+  db:
+    container_name: nginx-db
+    image: jc21/mariadb-aria:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PW}
+      MYSQL_DATABASE: npm
+      MYSQL_USER: npm
+      MYSQL_PASSWORD: ${DB_PW}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+
+  nginx:
+    container_name: nginx
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_MYSQL_HOST: nginx-db
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: npm
+      DB_MYSQL_PASSWORD: ${DB_PW}
+      DB_MYSQL_NAME: npm
+      TZ: ${TZ}
+    networks:
+      - default
+      - nginx-net
+      - vpn-net
+    ports:
+      - 80:80
+      - 443:443
+      - 81:81
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+      - /var/log/nginx:/data/logs
+

@@ -1,0 +1,31 @@
+version: "3"
+
+networks:
+
+  default:
+    name: grocy-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  grocy:
+    container_name: grocy
+    image: linuxserver/grocy:version-v2.7.1 # last version with android support
+    restart: unless-stopped
+    environment:
+      PGID: ${PGID}
+      PUID: ${PUID}
+      TZ: ${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.grocy-api.rule: Host(`grocy.${DOMAIN}`) && PathPrefix(`/api`)
+      traefik.http.routers.grocy.middlewares: authelia
+      traefik.http.services.ghost.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/config

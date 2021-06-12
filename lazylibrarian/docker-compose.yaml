@@ -1,0 +1,50 @@
+version: "3"
+
+networks:
+
+  default:
+    name: lazylibrarian-net
+
+  deluge-net:
+    external:
+      name: deluge-net
+
+  servarr-net:
+    external:
+      name: servarr-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  lazylibrarian:
+    container_name: lazylibrarian
+    image: linuxserver/lazylibrarian:latest
+    restart: unless-stopped
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.lazylibrarian-opds.rule: Host(`lazylibrarian.${DOMAIN}`) && Path(`/opds`)
+      traefik.http.routers.lazylibrarian.middlewares: authelia
+      traefik.http.services.lazylibrarian.loadbalancer.server.port: 5299
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/config
+      - /mnt/ssd1/downloads:/downloads
+      - books:/books
+
+volumes:
+
+  books:
+    driver: local
+    driver_opts:
+      device: :/Books
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

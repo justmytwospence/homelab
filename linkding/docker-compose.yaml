@@ -1,0 +1,26 @@
+version: "3"
+
+networks:
+
+  default:
+    name: linkding-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+    linkding:
+      container_name: linkding
+      image: sissbruecker/linkding:latest
+      restart: unless-stopped
+      networks:
+        - default
+        - traefik-net
+      labels:
+        traefik.enable: true
+        traefik.http.routers.linkding.middlewares: authelia
+        traefik.http.services.linkding.loadbalancer.server.port: 9090
+      volumes:
+        - ./data:/etc/linkding/data

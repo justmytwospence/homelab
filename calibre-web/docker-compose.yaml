@@ -1,0 +1,42 @@
+version: "3"
+
+networks:
+
+  default:
+    name: calibre-web-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  calibre-web:
+    container_name: calibre-web
+    image: linuxserver/calibre-web:latest
+    restart: unless-stopped
+    environment:
+      PGID: ${PGID}
+      PUID: ${PUID}
+      TZ: ${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.calibre-web-opds.rule: Host(`books.${DOMAIN}`) && PathPrefix(`/opds`)
+      traefik.http.routers.calibre-web.middlewares: authelia, error-pages
+      traefik.http.routers.calibre-web.rule: Host(`books.${DOMAIN}`)
+      traefik.http.services.calibre-web.loadbalancer.server.port: 8083
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/config
+      - calibre:/calibre
+
+volumes:
+
+  calibre:
+    driver: local
+    driver_opts:
+      device: :/Calibre
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

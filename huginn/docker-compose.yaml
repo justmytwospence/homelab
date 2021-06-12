@@ -1,0 +1,55 @@
+version: "3"
+
+networks:
+
+  default:
+    name: huginn-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  db:
+    container_name: huginn-db
+    image: postgres:13.2
+    restart: always
+    environment:
+      POSTGRES_DB: huginn
+      POSTGRES_PASSWORD: ${DB_PW}
+      POSTGRES_USER: huginn
+    healthcheck:
+      interval: 10s
+      start_period: 30s
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+    volumes:
+      - ./db/postgres.conf:/etc/postgresql/postgresql.conf
+      - ./db/pgdata:/var/lib/postgresql/data
+
+  huginn-threaded:
+    command: /scripts/init bin/threaded.rb
+    container_name: huginn-threaded
+    image: huginn/huginn-single-process:latest
+    restart: always
+    environment:
+      DATABASE_ADAPTER: postgresql
+      DATABASE_PASSWORD: ${DB_PW}
+      DATABASE_USERNAME: huginn
+
+  huginn-web:
+    container_name: huginn-web
+    image: huginn/huginn-single-process:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_ADAPTER: postgresql
+      DATABASE_PASSWORD: ${DB_PW}
+      DATABASE_USERNAME: huginn
+    labels:
+      traefik.enable: true
+      traefik.http.routers.huginn.middlewares: authelia
+      traefik.http.services.huginn.loadbalancer.server.port: 3000
+    networks:
+      - default
+      - traefik-net
+

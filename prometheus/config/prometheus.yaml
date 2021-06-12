@@ -1,0 +1,83 @@
+global:
+  evaluation_interval: 10s
+  scrape_interval: 10s
+
+scrape_configs:
+
+  - job_name: cadvisor
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["cadvisor:8080"]
+
+  # - job_name: deluge
+  #   static_configs:
+  #     - targets: ["deluge-exporter:9354"]
+
+  - job_name: geth
+    metrics_path: /debug/metrics/prometheus
+    static_configs:
+      - targets: ["geth:6060"]
+
+  - job_name: miniflux
+    scrape_interval: 10m
+    static_configs:
+      - targets: ["miniflux:8080"]
+
+  - job_name: ping
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    file_sd_configs:
+      - files:
+        - pinghosts.yaml
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*);(.*);(.*);(.*)'
+        target_label: instance
+        replacement: $1
+      - source_labels: [__address__]
+        regex: '(.*);(.*);(.*);(.*)'
+        target_label: humanname
+        replacement: $2
+      - source_labels: [instance]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: "ping-exporter:9115"
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: prysm-beacon
+    static_configs:
+      - targets: ["prysm-beacon:8080"]
+
+  - job_name: prysm-validator
+    static_configs:
+      - targets: ["prysm-validator:8081"]
+
+  - job_name: radarr
+    static_configs:
+      - targets: ["servarr-vpn:9708"]
+
+  - job_name: sonarr
+    static_configs:
+      - targets: ["servarr-vpn:9707"]
+
+  - job_name: speedtest
+    scrape_interval: 30m
+    scrape_timeout: 1m
+    static_configs:
+      - targets: ["speedtest-exporter:9798"]
+    tls_config:
+      insecure_skip_verify: true
+
+  - job_name: traefik
+    static_configs:
+      - targets: ["traefik:8082"]
+
+  - job_name: watchtower
+    bearer_token: watchtower
+    metrics_path: /v1/metrics
+    static_configs:
+      - targets: ["watchtower:8080"]

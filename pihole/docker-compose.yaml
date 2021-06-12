@@ -1,0 +1,59 @@
+version: "3"
+
+networks:
+
+  default:
+    name: pihole-net
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16 # See README
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:v5.8.1
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    dns:
+      - 127.0.0.1 # try to use itself for internal DNS
+      - 9.9.9.9 # fall back to Quad9
+      - 149.112.112.112 # Quad9 secondary server
+    environment:
+      ADMIN_EMAIL: pihole@${DOMAIN}
+      DNS_BOGUS_PRIV: "true"
+      DNS_FQDN_REQUIRED: "true"
+      DNSMASQ_LISTENING: all
+      DNSSEC: "true"
+      PIHOLE_DNS_: 9.9.9.9;149.112.112.112
+      QUERY_LOGGING: "true"
+      # REV_SERVER: "true"
+      # REV_SERVER_CIDR: ${REV_SERVER_CIDR}
+      # REV_SERVER_DOMAIN: local
+      # REV_SERVER_TARGET: ${REV_SERVER_TARGET}
+      ServerIP: ${ServerIP}
+      TEMPERATUREUNIT: c
+      TZ: ${TZ}
+      VIRTUAL_HOST: pihole.${DOMAIN}
+      WEBPASSWORD: "${WEBPASSWORD}"
+      WEBUIBOXEDLAYOUT: traditional
+    labels:
+      traefik.enable: true
+      traefik.http.routers.pihole-api.rule: Host(`pihole.${DOMAIN}`) && Path(`/admin/api.php`) && Query(`auth=${API_KEY}`)
+      traefik.http.routers.pihole.middlewares: authelia, whitelist-lan@file
+      traefik.http.services.pihole.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik-net
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 67:67/udp
+    volumes:
+      - ./pihole:/etc/pihole
+      - ./dnsmasq.d:/etc/dnsmasq.d
