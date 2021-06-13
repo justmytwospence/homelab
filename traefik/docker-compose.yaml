@@ -96,7 +96,7 @@ services:
       TRAEFIK_ACCESSLOG_FILEPATH: /var/log/access.log
       TRAEFIK_LOG_LEVEL: info
       # redirect HTTP (web) entrypoint to HTTPS (websecure) entrypoint
-      TRAEFIK_ENTRYPOINTS_WEB.ADDRESS: :80
+      TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: :80
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_PERMANENT: "true"
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_SCHEME: https
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO: websecure
@@ -111,6 +111,8 @@ services:
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_PROVIDER: namecheap
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: "${ACME_EMAIL}"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE: /letsencrypt/acme.json
+      # wireguard vpn entrypoint
+      TRAEFIK_ENTRYPOINTS_WIREGUARD_ADDRESS: :51820/udp
       # docker provider
       TRAEFIK_PROVIDERS_DOCKER_DEFAULTRULE: Host(`{{ index .Labels "com.docker.compose.service" }}.${DOMAIN}`)
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: tcp://traefik-docker-proxy:2375
@@ -143,6 +145,7 @@ services:
     ports:
       - 80:80
       - 443:443
+      - 51820:51820/udp
     volumes:
       - ./dynamic:/dynamic
       - ./letsencrypt:/letsencrypt
