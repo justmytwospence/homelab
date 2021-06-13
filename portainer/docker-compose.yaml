@@ -11,33 +11,16 @@ networks:
 
 services:
 
-  docker-proxy:
-    container_name: portainer-docker-proxy
-    image: ghcr.io/tecnativa/docker-socket-proxy:0.1
-    restart: unless-stopped
-    environment:
-      # LOG_LEVEL: debug
-      CONTAINERS: 1
-      IMAGES: 1
-      SERVICES: 1
-      TASKS: 1
-      VOLUMES: 1
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
     restart: unless-stopped
-    environment:
-      DOCKER_HOST: tcp://portainer-docker-proxy:2375
     labels:
       traefik.enable: true
       traefik.http.services.portainer.loadbalancer.server.port: 9000
     networks:
       - default
       - traefik-net
-    ports:
-      - 8000:8000
     volumes:
       - ./data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
