@@ -24,14 +24,18 @@ services:
     container_name: wallabag-redis
     image: redis:6.2.1
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
 
   wallabag:
     container_name: wallabag
     image: wallabag/wallabag:latest
     restart: unless-stopped
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
       SYMFONY__ENV__DATABASE_CHARSET: utf8mb4

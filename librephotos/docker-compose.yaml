@@ -17,11 +17,11 @@ services:
 
   backend:
     container_name: librephotos-backend
-    hostname: backend
     image: reallibrephotos/librephotos:dev
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       ADMIN_EMAIL: "librephotos@${DOMAIN}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
@@ -41,9 +41,9 @@ services:
       SKIP_PATTERNS:
       TIME_ZONE: "${TZ}"
       WEB_CONCURRENCY: 2
-    # networks:
-    #   - default
-    #   - nextcloud-net
+    networks:
+      - default
+      - nextcloud-net
     volumes:
       - ./cache:/root/.cache
       - ./photos:/data # photos
@@ -52,7 +52,6 @@ services:
 
   db:
     container_name: librephotos-db
-    hostname: db
     image: postgres:13.2
     restart: unless-stopped
     command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c random_page_cost=1.0
@@ -65,7 +64,6 @@ services:
 
   frontend:
     container_name: librephotos-frontend
-    hostname: frontend
     image: reallibrephotos/librephotos-frontend:dev
     restart: unless-stopped
     depends_on:
@@ -73,7 +71,6 @@ services:
 
   proxy:
     container_name: librephotos-proxy
-    hostname: proxy
     image: reallibrephotos/librephotos-proxy:dev
     restart: unless-stopped
     depends_on:
@@ -94,6 +91,7 @@ services:
   redis:
     command: redis-server
     container_name: librephotos-redis
-    hostname: redis
     image: redis:6.2.1
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]

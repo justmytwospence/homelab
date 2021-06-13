@@ -32,6 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       APP_DEBUG: "true"
       APP_ENV: local
@@ -87,6 +89,8 @@ services:
     container_name: lychee-redis
     image: redis:6.2.1
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
 
 volumes:
 

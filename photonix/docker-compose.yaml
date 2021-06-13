@@ -33,6 +33,11 @@ services:
     container_name: photonix
     image: photonixapp/photonix:0.8
     restart: unless-stopped
+    depends_on
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
       ADMIN_USERNAME: "${ADMIN_USERNAME}"
@@ -58,6 +63,8 @@ services:
     container_name: photonix-redis
     image: redis:6.2.1
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
 
 volumes:
 

@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     environment:
       AUTHELIA_JWT_SECRET_FILE: /config/secrets/jwt
       AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE: /config/secrets/smtp
@@ -66,6 +66,8 @@ services:
     restart: unless-stopped
     environment:
       TZ: "${TZ}"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
 
   traefik:
     container_name: traefik
