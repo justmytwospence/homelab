@@ -5,6 +5,10 @@ networks:
   default:
     name: traefik-net
 
+  prometheus-net:
+    external:
+      name: prometheus-net
+
 services:
 
   authelia:
@@ -60,6 +64,23 @@ services:
       traefik.http.routers.error-pages.priority: 1 # lowest priority
       traefik.http.routers.error-pages.rule: HostRegexp(`{host:.+}`)
 
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:latest
+    restart: unless-stopped
+    environment:
+      ADMIN_HTTP_HOST_PORT: :14269
+      LOG_LEVEL: INFO
+      METRICS_BACKEND: prometheus
+      METRICS_HTTP_ROUTE: /metrics
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jaeger.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.services.jaeger.loadbalancer.server.port: 16686
+    networks:
+      - default
+      - prometheus-net
+
   redis:
     container_name: authelia-redis
     image: redis:6.2.1
@@ -95,6 +116,13 @@ services:
       # logging
       TRAEFIK_ACCESSLOG_FILEPATH: /var/log/access.log
       TRAEFIK_LOG_LEVEL: info
+      # tracing
+      TRAEFIK_TRACING_JAEGER: "true"
+      TRAEFIK_TRACING_JAEGER_COLLECTOR_ENDPOINT: http://jaeger:14268/api/traces?format=jaeger.thrift
+      TRAEFIK_TRACING_JAEGER_LOCALAGENTHOSTPORT: jaeger:6831
+      TRAEFIK_TRACING_JAEGER_SAMPLINGPARAM: 1
+      TRAEFIK_TRACING_JAEGER_SAMPLINGSERVERURL: jaeger:5778
+      TRAEFIK_TRACING_SERVICENAME: traefik
       # redirect HTTP (web) entrypoint to HTTPS (websecure) entrypoint
       TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: :80
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_PERMANENT: "true"
@@ -142,6 +170,9 @@ services:
       traefik.http.routers.ping.middlewares: add-ping
       traefik.http.routers.ping.rule: "Host(`ping.${DOMAIN}`)"
       traefik.http.routers.ping.service: ping@internal
+    networks:
+      - default
+      - prometheus-net
     ports:
       - 80:80
       - 443:443

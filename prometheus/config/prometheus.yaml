@@ -18,6 +18,10 @@ scrape_configs:
     static_configs:
       - targets: ["geth:6060"]
 
+  - job_name: jaeger
+    static_configs:
+      - targets: ["jaeger:14269"]
+
   - job_name: miniflux
     scrape_interval: 10m
     static_configs:
