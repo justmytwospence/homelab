@@ -88,22 +88,13 @@ services:
 volumes:
 
   calibre:
-    driver: local
-    driver_opts:
-      device: :/Calibre
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
+    external:
+      name: Calibre
 
   documents:
-    driver: local
-    driver_opts:
-      device: :/Documents
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
+    external:
+      name: Documents
 
   photos:
-    driver: local
-    driver_opts:
-      device: :/Photos
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
+    external:
+      name: Photos

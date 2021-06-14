@@ -234,15 +234,9 @@ services:
 volumes:
 
   calibre:
-    driver: local
-    driver_opts:
-      device: :/Calibre
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
+    external:
+      name: Calibre
 
   multimedia:
-    driver: local
-    driver_opts:
-      device: :/Multimedia
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
+    external:
+      name: Multimedia
