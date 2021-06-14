@@ -1,0 +1,47 @@
+version: "3"
+
+networks:
+
+  default:
+    name: jupyter-net
+
+  prometheus-net:
+    external:
+      name: prometheus-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  jupyter:
+    container_name: jupyter
+    image: jupyter/datascience-notebook:latest
+    restart: unless-stopped
+    command:
+      - start-notebook.sh
+      - --Application.log_level=DEBUG
+      - --NotebookApp.authenticate_prometheus=False
+      - --NotebookApp.token=${NB_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 16G
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      NB_GID: "${GUID}"
+      NB_UID: "${PUID}"
+      NB_USER: "${NB_USER}"
+      RESTARTABLE: "yes"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jupyter.middlewares: authelia, error-pages
+      traefik.http.services.jupyter.loadbalancer.server.port: 8888
+    networks:
+      - default
+      - prometheus-net
+      - traefik-net
+    volumes:
+      - ./home:/home/${NB_USER}/work
