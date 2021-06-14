@@ -6,7 +6,7 @@ networks:
     name: pihole-net
     ipam:
       config:
-        - subnet: 172.18.0.0/16 # See README
+        - subnet: 10.2.0.0/24
 
   traefik-net:
     external:
@@ -20,40 +20,52 @@ services:
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
+    depends_on:
+      - unbound
     dns:
-      - 127.0.0.1 # try to use itself for internal DNS
-      - 9.9.9.9 # fall back to Quad9
-      - 149.112.112.112 # Quad9 secondary server
+      - 127.0.0.1 # pihole
+      - 10.2.0.200 # unbound
     environment:
-      ADMIN_EMAIL: pihole@${DOMAIN}
+      ADMIN_EMAIL: "pihole@${DOMAIN}"
       DNS_BOGUS_PRIV: "true"
       DNS_FQDN_REQUIRED: "true"
       DNSMASQ_LISTENING: all
       DNSSEC: "true"
-      PIHOLE_DNS_: 9.9.9.9;149.112.112.112
+      PIHOLE_DNS_: 10.2.0.200;10.2.0.200
       QUERY_LOGGING: "true"
-      # REV_SERVER: "true"
-      # REV_SERVER_CIDR: ${REV_SERVER_CIDR}
-      # REV_SERVER_DOMAIN: local
-      # REV_SERVER_TARGET: ${REV_SERVER_TARGET}
-      ServerIP: ${ServerIP}
+      ServerIP: "${ServerIP}"
       TEMPERATUREUNIT: c
       TZ: ${TZ}
-      VIRTUAL_HOST: pihole.${DOMAIN}
+      VIRTUAL_HOST: "pihole.${DOMAIN}"
       WEBPASSWORD: "${WEBPASSWORD}"
       WEBUIBOXEDLAYOUT: traditional
+      # conditional forwarding
+      # REV_SERVER: "true"
+      # REV_SERVER_CIDR: "${REV_SERVER_CIDR}"
+      # REV_SERVER_DOMAIN: local
+      # REV_SERVER_TARGET: "${REV_SERVER_TARGET}"
     labels:
       traefik.enable: true
       traefik.http.routers.pihole-api.rule: Host(`pihole.${DOMAIN}`) && Path(`/admin/api.php`) && Query(`auth=${API_KEY}`)
-      traefik.http.routers.pihole.middlewares: authelia, whitelist-lan@file
+      traefik.http.routers.pihole.middlewares: authelia, error-pages, whitelist-lan@file
       traefik.http.services.pihole.loadbalancer.server.port: 80
     networks:
-      - default
-      - traefik-net
+      default:
+        ipv4_address: 10.2.0.100
+      traefik-net:
     ports:
       - 53:53/tcp
       - 53:53/udp
-      - 67:67/udp
     volumes:
       - ./pihole:/etc/pihole
       - ./dnsmasq.d:/etc/dnsmasq.d
+
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:1.13.1
+    restart: unless-stopped
+    networks:
+      default:
+        ipv4_address: 10.2.0.200
+    volumes:
+      - ./unbound:/opt/unbound/etc/unbound

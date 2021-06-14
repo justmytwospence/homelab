@@ -28,3 +28,6 @@
 
 !traefik/dynamic/
 !traefik/dynamic/*
+
+!pihole/unbound/
+!pihole/unbound/unbound.conf
