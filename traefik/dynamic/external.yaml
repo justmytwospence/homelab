@@ -5,20 +5,9 @@ http:
       rule: Host(`plex.{{ env "DOMAIN" }}`)
       service: plex
 
-    qnap:
-      middlewares:
-        - whitelist-lan@file
-      rule: Host(`qnap.{{ env "DOMAIN" }}`)
-      service: qnap
-
   services:
 
     plex:
       loadBalancer:
         servers:
           - url: http://{{ env "QNAP_IP" }}:32400
-
-    qnap:
-      loadBalancer:
-        servers:
-          - url: http://{{ env "QNAP_IP" }}:8080
