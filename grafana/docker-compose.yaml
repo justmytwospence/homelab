@@ -15,19 +15,24 @@ services:
     container_name: grafana
     image: grafana/grafana:8.0.0
     restart: unless-stopped
+    dns:
+      - 9.9.9.9
+      - 149.112.112.112
     environment:
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/home.json
       GF_INSTALL_PLUGINS: flant-statusmap-panel
+      GF_LOG_MODE: console file
       GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD}"
       GF_USERS_ALLOW_SIGN_UP: "false"
     labels:
       traefik.enable: true
-      traefik.http.routers.grafana.middlewares: authelia
+      traefik.http.routers.grafana.middlewares: authelia, error-pages
       traefik.http.services.grafana.loadbalancer.server.port: 3000
     networks:
       - default
       - traefik-net
     volumes:
-      # these directories need to be 472:root permissioned
-      - ./provisioning/:/etc/grafana/provisioning
+      # these directories need to be owned by user 472
       - ./data:/var/lib/grafana
+      - ./provisioning/:/etc/grafana/provisioning
+      - /var/log/grafana:/var/log/grafana
