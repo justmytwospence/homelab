@@ -25,22 +25,19 @@ services:
       BLOCK_ADS: "on"
       BLOCK_MALICIOUS: "on"
       BLOCK_SURVEILLANCE: "on"
-      CITY: "${CITY}"
-      COUNTRY: "${COUNTRY}"
       DOT: "on"
       DOT_CACHING: "on"
       DOT_PROVIDERS: quad9
       FIREWALL: "on"
       FIREWALL_INPUT_PORTS: 9091
-      FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}"
-      OPENVPN_PASSWORD: "${OPENVPN_PASSWORD}"
+      FIREWALL_VPN_INPUT_PORTS: "${TRANSMISSION_PORT_FORWARD}"
       OPENVPN_USER: "${OPENVPN_USER}"
       OPENVPN_VERBOSITY: 2
       PGID: "${PGID}"
       PUID: "${PUID}"
       SERVER_HOSTNAME: "${SERVER_HOSTNAME}"
       TZ: "${TZ}"
-      VPNSP: "${VPNSP}"
+      VPNSP: mullvad
     networks:
       - default
       - prometheus-net
@@ -105,7 +102,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: 1
           memory: 1G
     environment:
       PUID: "${PUID}"
@@ -148,7 +145,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: 1
           memory: 1G
     environment:
       PGID: "${PGID}"
@@ -180,7 +177,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: 1
           memory: 1G
     environment:
       PUID: "${PUID}"
