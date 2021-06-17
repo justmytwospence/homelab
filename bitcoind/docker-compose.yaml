@@ -1,0 +1,64 @@
+version: "3"
+
+networks:
+
+  default:
+    name: bitcoin-net
+
+services:
+
+  bitcoind:
+    container_name: bitcoind
+    image: kylemanna/bitcoind:1.0.0
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          # cpus: 1
+          memory: 2G
+    logging:
+      driver: json-file
+      options:
+        max-size: "200k"
+        max-file: "10"
+    volumes:
+      - bitcoin:/bitcoin/.bitcoin
+      - ./bitcoin.conf:/bitcoin/.bitcoin/bitcoin.conf:ro
+
+  gluetun:
+    container_name: bitcoin-vpn
+    image: qmcgaw/gluetun:v3.18.0
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    environment:
+      BLOCK_ADS: "on"
+      BLOCK_MALICIOUS: "on"
+      BLOCK_SURVEILLANCE: "on"
+      DOT: "on"
+      DOT_CACHING: "on"
+      DOT_PROVIDERS: quad9
+      FIREWALL: "on"
+      FIREWALL_VPN_INPUT_PORTS:
+      OPENVPN_USER: "${OPENVPN_USER}"
+      OPENVPN_VERBOSITY: 2
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      SERVER_HOSTNAME: "${SERVER_HOSTNAME}"
+      TZ: "${TZ}"
+      VPNSP: mullvad
+    volumes:
+      - ./gluetun:/gluetun
+
+volumes:
+
+  bitcoin:
+    driver: local
+    driver_opts:
+      device: :/Bitcoin
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
