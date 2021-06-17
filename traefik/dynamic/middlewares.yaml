@@ -7,3 +7,9 @@ http:
           - 10.0.0.0/8
           - 172.16.0.0/12
           - 192.168.0.0/16
+
+    ratelimit-100:
+      rateLimit:
+        average: 100 # maximum requests per period
+        period: 1 # second
+        burst: 20
