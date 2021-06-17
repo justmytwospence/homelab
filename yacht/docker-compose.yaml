@@ -16,10 +16,12 @@ services:
     image: ghcr.io/tecnativa/docker-socket-proxy:0.1
     restart: unless-stopped
     environment:
-      # LOG_LEVEL: debug
+      AUTH: 1
       CONTAINERS: 1
       IMAGES: 1
+      LOG_LEVEL: info
       NETWORKS: 1
+      POST: 1
       VOLUMES: 1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -36,7 +38,7 @@ services:
       DOCKER_HOST: tcp://yacht-docker-proxy:2375
     labels:
       traefik.enable: true
-      traefik.http.routers.yacht.middlewares: authelia, whitelist-lan@file
+      traefik.http.routers.yacht.middlewares: authelia, error-pages, whitelist-lan@file
       traefik.http.services.yacht.loadbalancer.server.port: 8000
     networks:
       - default
