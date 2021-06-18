@@ -6,7 +6,7 @@ networks:
     name: pihole-net
     ipam:
       config:
-        - subnet: 10.2.0.0/24
+        - subnet: 172.16.0.0/16
 
   traefik-net:
     external:
@@ -16,6 +16,7 @@ services:
 
   pihole:
     container_name: pihole
+    hostname: pihole
     image: pihole/pihole:v5.8.1
     restart: unless-stopped
     cap_add:
@@ -24,18 +25,20 @@ services:
       - unbound
     dns:
       - 127.0.0.1 # pihole
-      - 10.2.0.200 # unbound
+      - 172.16.0.200 # unbound
+      - 9.9.9.9
+      - 149.112.112.112
     environment:
       ADMIN_EMAIL: "pihole@${DOMAIN}"
       DNS_BOGUS_PRIV: "true"
       DNS_FQDN_REQUIRED: "true"
       DNSMASQ_LISTENING: all
       DNSSEC: "true"
-      PIHOLE_DNS_: 10.2.0.200;10.2.0.200
+      PIHOLE_DNS_: 172.16.0.200;172.16.0.200
       QUERY_LOGGING: "true"
       ServerIP: "${ServerIP}"
       TEMPERATUREUNIT: c
-      TZ: ${TZ}
+      TZ: "${TZ}"
       VIRTUAL_HOST: "pihole.${DOMAIN}"
       WEBPASSWORD: "${WEBPASSWORD}"
       WEBUIBOXEDLAYOUT: traditional
@@ -51,11 +54,11 @@ services:
       traefik.http.services.pihole.loadbalancer.server.port: 80
     networks:
       default:
-        ipv4_address: 10.2.0.100
+        ipv4_address: 172.16.0.100
       traefik-net:
     ports:
-      - 53:53/tcp
-      - 53:53/udp
+      - "${ServerIP}:53:53/tcp"
+      - "${ServerIP}:53:53/udp"
     volumes:
       - ./pihole:/etc/pihole
       - ./dnsmasq.d:/etc/dnsmasq.d
@@ -66,6 +69,6 @@ services:
     restart: unless-stopped
     networks:
       default:
-        ipv4_address: 10.2.0.200
+        ipv4_address: 172.16.0.200
     volumes:
-      - ./unbound:/opt/unbound/etc/unbound
+      - ./unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf:ro

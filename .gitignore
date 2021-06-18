@@ -30,4 +30,4 @@
 !traefik/dynamic/*
 
 !pihole/unbound/
-!pihole/unbound/unbound.conf
+!pihole/unbound/forward-records.conf

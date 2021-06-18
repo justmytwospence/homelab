@@ -23,7 +23,7 @@ services:
       - NET_ADMIN
       - SYS_MODULE
     dns:
-      - 10.2.0.1 # pi-hole subnet gateway
+      - 172.16.0.100 # pi-hole
     environment:
       ALLOWEDIPS: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
       PEERDNS: auto
