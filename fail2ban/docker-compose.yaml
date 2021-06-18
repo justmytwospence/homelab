@@ -12,15 +12,14 @@ services:
       - NET_RAW
     environment:
       F2B_DB_PURGE_AGE: 1d
-      F2B_LOG_LEVEL: INFO
+      F2B_LOG_LEVEL: DEBUG
       F2B_LOG_TARGET: /var/log/fail2ban/fail2ban.log
-      SSMTP_HOST: ${SSMTP_HOST}
-      SSMTP_PASSWORD: ${SSMTP_PASSWORD}
+      SSMTP_HOST: "${SSMTP_HOST}"
+      SSMTP_PASSWORD: "${SSMTP_PASSWORD}"
       SSMTP_PORT: 587
       SSMTP_STARTTLS: "YES"
-      SSMTP_TLS: "YES"
-      SSMTP_USER: ${SSMTP_USER}
-      TZ: ${TZ}
+      SSMTP_USER: "${SSMTP_USER}"
+      TZ: "${TZ}"
     volumes:
       - ./data:/data
       - /var/log/fail2ban:/var/log/fail2ban

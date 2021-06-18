@@ -11,6 +11,12 @@
 
 # specific whitelisting
 
+!fail2ban/data/
+!fail2ban/data/filter.d/
+!fail2ban/data/filter.d/*
+!fail2ban/data/jail.d/
+!fail2ban/data/jail.d/jail.conf
+
 !grafana/provisioning/
 !grafana/provisioning/**
 
