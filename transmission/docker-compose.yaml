@@ -1,0 +1,48 @@
+version: "3"
+
+networks:
+
+  default:
+    name: transmission-net
+
+  prometheus-net:
+    external:
+      name: prometheus-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  transmission:
+    container_name: transmission
+    image: linuxserver/transmission:version-3.00-r2
+    restart: unless-stopped
+    environment:
+      PASS: "${TRANSMISSION_PASS}"
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
+      USER: "${TRANSMISSION_USER}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.transmission.rule: "Host(`transmission.${DOMAIN}`)"
+      traefik.http.services.transmission.loadbalancer.server.port: 9091
+    networks:
+      - default
+      - prometheus-net
+      - traefik-net
+    volumes:
+      - distros:/downloads/distros
+      - ./transmission:/config
+
+volumes:
+
+  distros:
+    driver: local
+    name: distros
+    driver_opts:
+      device: :/Distros
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

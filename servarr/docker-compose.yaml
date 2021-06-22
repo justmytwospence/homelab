@@ -207,7 +207,7 @@ services:
       URL: "http://localhost:8989"
 
   transmission:
-    container_name: transmission
+    container_name: transmission-servarr
     image: linuxserver/transmission:version-3.00-r2
     network_mode: "service:gluetun"
     restart: unless-stopped
@@ -222,8 +222,8 @@ services:
       USER: "${TRANSMISSION_USER}"
     labels:
       traefik.enable: true
-      traefik.http.routers.transmission.rule: "Host(`transmission.${DOMAIN}`)"
-      traefik.http.services.transmission.loadbalancer.server.port: 9091
+      traefik.http.routers.transmission-servarr.rule: "Host(`servarr.${DOMAIN}`)"
+      traefik.http.services.transmission-servarr.loadbalancer.server.port: 9091
     volumes:
       - ./downloads/transmission:/downloads
       - ./transmission:/config
@@ -235,5 +235,9 @@ volumes:
       name: calibre
 
   multimedia:
-    external:
-      name: multimedia
+    driver: local
+    name: multimedia
+    driver_opts:
+      device: :/Multimedia
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
