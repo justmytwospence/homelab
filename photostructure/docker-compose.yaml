@@ -38,4 +38,4 @@ volumes:
 
   photos:
     external:
-      name: Photos
+      name: photos

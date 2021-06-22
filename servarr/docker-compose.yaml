@@ -232,8 +232,8 @@ volumes:
 
   calibre:
     external:
-      name: Calibre
+      name: calibre
 
   multimedia:
     external:
-      name: Multimedia
+      name: multimedia

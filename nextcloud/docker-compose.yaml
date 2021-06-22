@@ -89,12 +89,12 @@ volumes:
 
   calibre:
     external:
-      name: Calibre
+      name: calibre
 
   documents:
     external:
-      name: Documents
+      name: documents
 
   photos:
     external:
-      name: Photos
+      name: photos

@@ -36,4 +36,4 @@ volumes:
 
   calibre:
     external:
-      name: Calibre
+      name: calibre
