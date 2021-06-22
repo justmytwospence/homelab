@@ -24,10 +24,10 @@ services:
       - --disable_metrics=percpu,disk,tcp,udp,sched,process
       - --docker=tcp://cadvisor-docker-proxy:2375
       - --docker_only
-      # - --global_housekeeping_interval=1m
-      # - --housekeeping_interval=30s
-      # - --max_procs=2
-      # - --v=0
+      - --global_housekeeping_interval=1m # default 1m
+      - --housekeeping_interval=10s # default 1s
+      - --profiling=true # /debug/pprof
+      - --v=0
     depends_on:
       docker-proxy:
         condition: service_started
@@ -51,10 +51,10 @@ services:
     image: ghcr.io/tecnativa/docker-socket-proxy:0.1
     restart: unless-stopped
     environment:
-      # LOG_LEVEL: debug
       CONTAINERS: 1
       IMAGES: 1
       INFO: 1
+      LOG_LEVEL: info
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
@@ -72,6 +72,7 @@ services:
 
   prometheus:
     container_name: prometheus
+    dns: [ 192.168.1.1 ] # bypass pihole to unbound
     image: prom/prometheus:v2.27.1
     restart: unless-stopped
     user: "${PUID}"
@@ -79,7 +80,7 @@ services:
       - --config.file=/etc/prometheus/prometheus.yaml
       - --log.level=debug
       - --web.enable-admin-api
-      - --web.external-url="https://prometheus.${DOMAIN}"
+      - --web.external-url=https://prometheus.${DOMAIN}
     labels:
       traefik.enable: true
       traefik.http.routers.prometheus-api.middlewares: whitelist-lan@file
