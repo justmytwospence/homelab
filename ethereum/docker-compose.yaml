@@ -1,0 +1,180 @@
+version: "3"
+
+networks:
+
+  default:
+    name: ethereum-net
+
+  prometheus-net:
+    external:
+      name: prometheus-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  geth:
+    container_name: geth
+    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    image: ethereum/client-go:stable
+    restart: unless-stopped
+    command:
+      - --cache=8192
+      - --datadir=/data
+      - --goerli # testnet
+      - --identity=NodeyMcNodeFace
+      - --ipcpath=/root/.ethereum/geth.ipc
+      - --log.debug=true
+      - --maxpeers=100
+      - --metrics # /debug/metrics/prometheus
+      - --metrics.addr=0.0.0.0
+      - --metrics.port=6060 # default 6060
+      - --port=30303 # default 30303
+      - --syncmode=fast
+    deploy:
+      resources:
+        limits:
+          cpus: 6
+          memory: 32G
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 200k
+    networks:
+      - default
+      - prometheus-net
+    ports:
+      - 30303:30303 # p2p
+    volumes:
+      - ./geth:/root/.ethereum
+      # - geth:/data
+      - geth-goerli:/data
+
+  prysm-beacon:
+    container_name: prysm-beacon
+    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    image: prysmaticlabs/prysm-beacon-chain:stable
+    restart: unless-stopped
+    command:
+      - "--fallback-web3provider=https://goerli.infura.io/v3/${INFURA_GOERLI_PROJECT},Basic ${INFURA_GOERLI_SECRET}"
+      - --accept-terms-of-use
+      - --datadir=/data
+      - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
+      - --grpc-gateway-port=3500 # default 3500
+      - --http-web3provider=/geth/geth.ipc
+      - --monitoring-host=0.0.0.0
+      - --monitoring-port=8080 # default 8080/metrics
+      - --p2p-max-peers=100
+      - --p2p-tcp-port=13000 # default 13000
+      - --p2p-udp-port=12000 # default 12000
+      - --pyrmont # testnet
+      - --rpc-host=0.0.0.0 # default 0.0.0.0
+      - --rpc-port=4000 # default 4000
+      - --verbosity=debug # default info
+    depends_on:
+      geth:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: 6
+          memory: 32G
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 200k
+    networks:
+      - default
+      - prometheus-net
+    ports:
+      - 12000:12000 # p2p udp
+      - 13000:13000 # p2p tcp
+    volumes:
+      - ./geth:/geth
+      # - beacon:/data
+      - beacon-pyrmont:/data
+
+  prysm-validator:
+    container_name: prysm-validator
+    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    image: prysmaticlabs/prysm-validator:stable
+    restart: unless-stopped
+    command:
+      - --accept-terms-of-use
+      - --beacon-rpc-gateway-provider=prysm-beacon:3500
+      - --beacon-rpc-provider=prysm-beacon:4000
+      - --datadir=/data
+      - --graffiti='Hakuna Matata'
+      - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
+      - --grpc-gateway-port=7500 # default 7500
+      - --monitoring-host=0.0.0.0 # default 127.0.0.1
+      - --monitoring-port=8081 # /metrics
+      - --pyrmont # testnet
+      - --rpc-host=0.0.0.0 # default 127.0.0.1
+      - --rpc-port=7000 # default 7000
+      - --verbosity=debug # default info
+      - --wallet-dir=/wallet
+      - --web
+    depends_on:
+      prysm-beacon:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 16G
+    labels:
+      traefik.enable: true
+      traefik.http.routers.prysm.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.prysm.rule: "Host(`prysm.${DOMAIN}`)"
+      traefik.http.services.prysm.loadbalancer.server.port: 7500
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 200k
+    networks:
+      - default
+      - prometheus-net
+      - traefik-net
+    volumes:
+      - ./validator:/data
+      - ./wallet:/wallet
+
+volumes:
+
+  # beacon:
+  #   driver: local
+  #   name: beacon
+  #   driver_opts:
+  #     device: :/Beacon
+  #     o: addr=192.168.1.3,nfsvers=4,rw
+  #     type: nfs
+
+  beacon-pyrmont:
+    driver: local
+    name: beacon-pyrmont
+    driver_opts:
+      device: :/Beacon-Pyrmont
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
+
+  # geth:
+  #   driver: local
+  #   name: geth
+  #   driver_opts:
+  #     device: :/Geth
+  #     o: addr=192.168.1.3,nfsvers=4,rw
+  #     type: nfs
+
+  geth-goerli:
+    driver: local
+    name: geth-goerli
+    driver_opts:
+      device: :/Geth-Goerli
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
