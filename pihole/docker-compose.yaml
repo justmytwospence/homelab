@@ -21,11 +21,9 @@ services:
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
-    depends_on:
-      - unbound
     dns:
-      - 127.0.0.1 # pihole
-      - 172.16.0.200 # unbound
+      - 127.0.0.1 # local pihole
+      - 192.168.1.1 # opnsense unbound
       - 9.9.9.9
       - 149.112.112.112
     environment:
@@ -34,19 +32,18 @@ services:
       DNS_FQDN_REQUIRED: "true"
       DNSMASQ_LISTENING: all
       DNSSEC: "true"
-      PIHOLE_DNS_: 172.16.0.200;172.16.0.200
+      PIHOLE_DNS_: 192.168.1.1;192.168.1.1 # opnsense unbound
       QUERY_LOGGING: "true"
-      ServerIP: "${ServerIP}"
+      REV_SERVER: "true"
+      REV_SERVER_CIDR: 192.168.1.0/24
+      REV_SERVER_DOMAIN: "${DOMAIN}"
+      REV_SERVER_TARGET: 192.168.1.1
+      ServerIP: "${ServerIP}" # host IP
       TEMPERATUREUNIT: c
       TZ: "${TZ}"
       VIRTUAL_HOST: "pihole.${DOMAIN}"
       WEBPASSWORD: "${WEBPASSWORD}"
       WEBUIBOXEDLAYOUT: traditional
-      # conditional forwarding
-      # REV_SERVER: "true"
-      # REV_SERVER_CIDR: "${REV_SERVER_CIDR}"
-      # REV_SERVER_DOMAIN: local
-      # REV_SERVER_TARGET: "${REV_SERVER_TARGET}"
     labels:
       traefik.enable: true
       traefik.http.routers.pihole-api.rule: Host(`pihole.${DOMAIN}`) && Path(`/admin/api.php`) && Query(`auth=${API_KEY}`)
@@ -62,13 +59,3 @@ services:
     volumes:
       - ./pihole:/etc/pihole
       - ./dnsmasq.d:/etc/dnsmasq.d
-
-  unbound:
-    container_name: unbound
-    image: mvance/unbound:1.13.1
-    restart: unless-stopped
-    networks:
-      default:
-        ipv4_address: 172.16.0.200
-    volumes:
-      - ./unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf:ro
