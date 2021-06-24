@@ -17,6 +17,7 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
+      traefik.http.routers.traccar.middlewares: error-pages
       traefik.http.services.traccar.loadbalancer.server.port: 8082
     networks:
       - default

@@ -52,7 +52,7 @@ services:
     restart: unless-stopped
     depends_on:
       gluetun:
-        condition: service_started
+        condition: service_healthy
     labels:
       traefik.enable: true
       traefik.http.routers.jackett-api.rule: Host(`jackett.${DOMAIN}`) && PathPrefix(`/api`) && (Headers(`X-Api-Key`, `${JACKETT_API_KEY}`) || Query(`apikey=${JACKETT_API_KEY}`))
@@ -74,7 +74,7 @@ services:
     restart: unless-stopped
     depends_on:
       gluetun:
-        condition: service_started
+        condition: service_healthy
     environment:
       PGID: "${PGID}"
       PUID: "${PUID}"
@@ -94,7 +94,7 @@ services:
     restart: unless-stopped
     depends_on:
       gluetun:
-        condition: service_started
+        condition: service_healthy
       jackett:
         condition: service_started
       transmission:
@@ -137,7 +137,7 @@ services:
     restart: unless-stopped
     depends_on:
       gluetun:
-        condition: service_started
+        condition: service_healthy
       jackett:
         condition: service_started
       transmission:
@@ -169,7 +169,7 @@ services:
     restart: unless-stopped
     depends_on:
       gluetun:
-        condition: service_started
+        condition: service_healthy
       jackett:
         condition: service_started
       transmission:
@@ -213,7 +213,7 @@ services:
     restart: unless-stopped
     depends_on:
       gluetun:
-        condition: service_started
+        condition: service_healthy
     environment:
       PASS: "${TRANSMISSION_PASS}"
       PGID: "${PGID}"

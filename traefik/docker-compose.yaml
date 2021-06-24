@@ -139,7 +139,7 @@ services:
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_PROVIDER: namecheap
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: "${ACME_EMAIL}"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE: /letsencrypt/acme.json
-      # wireguard vpn entrypoint
+      # wireguard VPN entrypoint
       TRAEFIK_ENTRYPOINTS_WIREGUARD_ADDRESS: :51820/udp
       # docker provider
       TRAEFIK_PROVIDERS_DOCKER_DEFAULTRULE: Host(`{{ index .Labels "com.docker.compose.service" }}.${DOMAIN}`)

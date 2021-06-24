@@ -34,23 +34,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: "0.15"
-          memory: 50M
     environment:
-      # DEBUG: 1
       ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
       ADMIN_USERNAME: "${ADMIN_USERNAME}"
-      BASE_URL: https://miniflux.${DOMAIN}
+      BASE_URL: "https://miniflux.${DOMAIN}"
       BATCH_SIZE: 100 # default 100
       CREATE_ADMIN: 1
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@miniflux-db/miniflux?sslmode=disable
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@miniflux-db/miniflux?sslmode=disable"
+      DEBUG: 0
       FETCH_YOUTUBE_WATCH_TIME: 1
       HTTP_CLIENT_TIMEOUT: 30 # seconds
       LOG_DATE_TIME: 1
-      METRICS_ALLOWED_NETWORKS: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      METRICS_ALLOWED_NETWORKS: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
       METRICS_COLLECTOR: 1
       POCKET_CONSUMER_KEY: "${POCKET_CONSUMER_KEY}"
       POLLING_SCHEDULER: entry_frequency
@@ -66,6 +61,7 @@ services:
       traefik.http.services.miniflux.loadbalancer.server.port: 8080
     logging:
       options:
+        max-file: "3"
         max-size: 10M
     networks:
       - default

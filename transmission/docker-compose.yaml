@@ -35,7 +35,7 @@ services:
       - traefik-net
     volumes:
       - distros:/downloads/distros
-      - ./transmission:/config
+      - ./config:/config
 
 volumes:
 
