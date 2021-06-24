@@ -24,20 +24,18 @@ services:
     dns:
       - 127.0.0.1 # local pihole
       - 192.168.1.1 # opnsense unbound
-      - 9.9.9.9
-      - 149.112.112.112
     environment:
       ADMIN_EMAIL: "pihole@${DOMAIN}"
       DNS_BOGUS_PRIV: "true"
       DNS_FQDN_REQUIRED: "true"
       DNSMASQ_LISTENING: all
       DNSSEC: "true"
-      PIHOLE_DNS_: 192.168.1.1;192.168.1.1 # opnsense unbound
+      PIHOLE_DNS_: 192.168.1.1 # opnsense unbound
       QUERY_LOGGING: "true"
       REV_SERVER: "true"
       REV_SERVER_CIDR: 192.168.1.0/24
       REV_SERVER_DOMAIN: "${DOMAIN}"
-      REV_SERVER_TARGET: 192.168.1.1
+      REV_SERVER_TARGET: 192.168.1.1 # opnsense DHCP
       ServerIP: "${ServerIP}" # host IP
       TEMPERATUREUNIT: c
       TZ: "${TZ}"
@@ -57,5 +55,5 @@ services:
       - "${ServerIP}:53:53/tcp"
       - "${ServerIP}:53:53/udp"
     volumes:
-      - ./pihole:/etc/pihole
       - ./dnsmasq.d:/etc/dnsmasq.d
+      - ./pihole:/etc/pihole
