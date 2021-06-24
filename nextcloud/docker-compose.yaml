@@ -75,6 +75,7 @@ services:
       - ./data:/data
       - calibre:/calibre
       - documents:/documents
+      - gpx:/gpx
       - photos:/photos
 
   redis:
@@ -88,8 +89,12 @@ services:
 volumes:
 
   calibre:
-    external:
-      name: calibre
+    driver: local
+    name: calibre
+    driver_opts:
+      device: :/Calibre
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
 
   documents:
     driver: local
@@ -99,6 +104,18 @@ volumes:
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
 
+  gpx:
+    driver: local
+    name: gpx
+    driver_opts:
+      device: :/GPX
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
+
   photos:
-    external:
-      name: photos
+    driver: local
+    name: photos
+    driver_opts:
+      device: :/Photos
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

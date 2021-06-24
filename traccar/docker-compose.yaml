@@ -25,3 +25,10 @@ services:
     volumes:
       - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
       - /var/log/traccar:/opt/traccar/logs:rw
+      - gpx:/gpx
+
+volumes:
+
+  gpx:
+    external:
+      name: gpx
