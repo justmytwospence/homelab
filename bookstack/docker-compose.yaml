@@ -1,0 +1,49 @@
+version: "3"
+
+networks:
+  
+  default:
+    name: bookstack-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  bookstack:
+    container_name: bookstack
+    image: linuxserver/bookstack:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_started
+    environment:
+      APP_URL: "https://bookstack.${DOMAIN}"
+      DB_DATABASE: bookstack
+      DB_HOST: bookstack-db
+      DB_PASS: "${MYSQL_PASSWORD}"
+      DB_USER: bookstack
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.bookstack.middlewares: authelia, error-pages
+      traefik.http.services.bookstack.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./config:/config
+
+  db:
+    container_name: bookstack-db
+    image: mariadb:10.1
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bookstack
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_USER: bookstack
+    volumes:
+      - ./db:/var/lib/mysql
