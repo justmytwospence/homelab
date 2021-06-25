@@ -117,8 +117,9 @@ services:
       - --rpc-host=0.0.0.0 # default 127.0.0.1
       - --rpc-port=7000 # default 7000
       - --verbosity=debug # default info
-      - --wallet-dir=/wallet
+      - --wallet-dir=/data/wallet
       - --web
+      - --write-wallet-password-on-web-onboarding
     depends_on:
       prysm-beacon:
         condition: service_started
@@ -143,7 +144,6 @@ services:
       - traefik-net
     volumes:
       - ./validator:/data
-      - ./wallet:/wallet
 
 volumes:
 
