@@ -19,6 +19,10 @@ services:
     container_name: transmission
     image: linuxserver/transmission:version-3.00-r2
     restart: unless-stopped
+    deploy:
+      resources:
+        limit:
+          memory: 8GB
     environment:
       PASS: "${TRANSMISSION_PASS}"
       PGID: "${PGID}"
