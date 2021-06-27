@@ -55,7 +55,7 @@ services:
         condition: service_healthy
     labels:
       traefik.enable: true
-      traefik.http.routers.jackett-api.rule: Host(`jackett.${DOMAIN}`) && PathPrefix(`/api`) && (Headers(`X-Api-Key`, `${JACKETT_API_KEY}`) || Query(`apikey=${JACKETT_API_KEY}`))
+      traefik.http.routers.jackett-api.rule: Host(`jackett.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.routers.jackett.middlewares: authelia, error-pages
       traefik.http.routers.jackett.rule: "Host(`jackett.${DOMAIN}`)"
       traefik.http.services.jackett.loadbalancer.server.port: 9117
@@ -110,7 +110,7 @@ services:
       TZ: "${TZ}"
     labels:
       traefik.enable: true
-      traefik.http.routers.radarr-api.rule: Host(`radarr.${DOMAIN}`) && PathPrefix(`/api`) && (Headers(`X-Api-Key`, `${RADARR_API_KEY}`) || Query(`apikey=${RADARR_API_KEY}`))
+      traefik.http.routers.radarr-api.rule: Host(`radarr.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.routers.radarr.middlewares: authelia, error-pages
       traefik.http.routers.radarr.rule: "Host(`radarr.${DOMAIN}`)"
       traefik.http.services.radarr.loadbalancer.server.port: 7878
@@ -185,7 +185,7 @@ services:
       TZ: "${TZ}"
     labels:
       traefik.enable: true
-      traefik.http.routers.sonarr-api.rule: Host(`sonarr.${DOMAIN}`) && PathPrefix(`/api`) && (Headers(`X-Api-Key`, `${SONARR_API_KEY}`) || Query(`apikey=${SONARR_API_KEY}`))
+      traefik.http.routers.sonarr-api.rule: Host(`sonarr.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.routers.sonarr.middlewares: authelia, error-pages
       traefik.http.routers.sonarr.rule: "Host(`sonarr.${DOMAIN}`)"
       traefik.http.services.sonarr.loadbalancer.server.port: 8989
@@ -211,6 +211,10 @@ services:
     image: linuxserver/transmission:version-3.00-r2
     network_mode: "service:gluetun"
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
     depends_on:
       gluetun:
         condition: service_healthy
