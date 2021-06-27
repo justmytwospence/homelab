@@ -25,6 +25,8 @@
 !homer/assets/
 !homer/assets/config.yaml
 
+!monero/bitmonero.conf
+
 !prometheus/config/
 !prometheus/config/*
 

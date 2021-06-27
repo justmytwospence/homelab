@@ -12,14 +12,12 @@ services:
     image: xmrto/monero:v0.17.2.0
     restart: unless-stopped
     command:
-      - --data-dir=/data
-      - --in-peers=50
-      - --out-peers=50
+      - "--rpc-login=${RPC_USER}:${RPC_PASSWORD}"
     deploy:
       resources:
         limits:
-          cpus: 4
-          memory: 4G
+          cpus: 2 # 2 recommended
+          memory: 4G # 4G+ recommended
     environment:
       LOG_LEVEL: 1
       P2P_BIND_PORT: 18080 # default 18080
