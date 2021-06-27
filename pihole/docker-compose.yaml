@@ -19,23 +19,21 @@ services:
     hostname: pihole
     image: pihole/pihole:v5.8.1
     restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
     dns:
-      - 127.0.0.1 # local pihole
-      - 192.168.1.1 # opnsense unbound
+      - 127.0.0.1 # this Pihole
+      - 192.168.1.1 # OPNsense Unbound
     environment:
       ADMIN_EMAIL: "pihole@${DOMAIN}"
-      DNS_BOGUS_PRIV: "true"
-      DNS_FQDN_REQUIRED: "true"
+      DNS_BOGUS_PRIV: "false"
+      DNS_FQDN_REQUIRED: "false"
       DNSMASQ_LISTENING: all
-      DNSSEC: "true"
-      PIHOLE_DNS_: 192.168.1.1 # opnsense unbound
+      DNSSEC: "false" # DNSSEC handled by OPNsense Unbound
+      PIHOLE_DNS_: 192.168.1.1 # OPNsense Unbound
       QUERY_LOGGING: "true"
       REV_SERVER: "true"
       REV_SERVER_CIDR: 192.168.1.0/24
-      REV_SERVER_DOMAIN: "${DOMAIN}"
-      REV_SERVER_TARGET: 192.168.1.1 # opnsense DHCP
+      REV_SERVER_DOMAIN: lan
+      REV_SERVER_TARGET: 192.168.1.1 # OPNsense DHCP
       ServerIP: "${ServerIP}" # host IP
       TEMPERATUREUNIT: c
       TZ: "${TZ}"
@@ -44,7 +42,7 @@ services:
       WEBUIBOXEDLAYOUT: traditional
     labels:
       traefik.enable: true
-      traefik.http.routers.pihole-api.rule: Host(`pihole.${DOMAIN}`) && Path(`/admin/api.php`) && Query(`auth=${API_KEY}`)
+      traefik.http.routers.pihole-api.rule: Host(`pihole.${DOMAIN}`) && Path(`/admin/api.php`)
       traefik.http.routers.pihole.middlewares: authelia, error-pages, whitelist-lan@file
       traefik.http.services.pihole.loadbalancer.server.port: 80
     networks:
