@@ -69,7 +69,7 @@ services:
       - grafana-net
       - traefik-net
     ports:
-      - 8086:8086 # must be exposed because telegraf is on the host network
+      - 8086:8086 # needed because telegraf is on host network
     volumes:
       - ./influxdb:/var/lib/influxdb2
       - /var/log/influxdb:/var/log
@@ -80,13 +80,12 @@ services:
     restart: unless-stopped
     environment:
       KAPACITOR_HOSTNAME: kapacitor
+      KAPACITOR_INFLUXDB_0_DISABLE_SUBSCRIPTIONS: "true"
+      KAPACITOR_INFLUXDB_0_PASSWORD: "${INFLUX_TOKEN}"
       KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+      KAPACITOR_INFLUXDB_0_USERNAME: "${INFLUX_USERNAME}"
       KAPACITOR_LOGGING_LEVEL: INFO
       KAPACITOR_REPORTING_ENABLED: "false"
-    labels:
-      traefik.enable: true
-      traefik.http.routers.kapacitor.middlewares: authelia, error-pages, whitelist-lan@file
-      traefik.http.services.kapacitor.loadbalancer.server.port: 9092
     networks:
       - default
       - traefik-net
