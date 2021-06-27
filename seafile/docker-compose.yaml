@@ -13,11 +13,13 @@ services:
 
   db:
     container_name: seafile-db
-    image: mariadb:10.5
+    image: mariadb:10.6.2
     restart: unless-stopped
     environment:
-      MYSQL_LOG_CONSOLE: "true"
-      MYSQL_ROOT_PASSWORD: "${PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: "${MYSQL_USER}"
     volumes:
       - ./db:/var/lib/mysql
 

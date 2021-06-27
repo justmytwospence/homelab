@@ -42,18 +42,15 @@ services:
 
   db:
     container_name: chevereto-db
-    image: linuxserver/mariadb:alpine-10.5.9-r0-ls14
-    restart: always
+    image: mariadb:10.6.2
+    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: chevereto
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
       MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_USER: chevereto
-      PGID: "${PGID}"
-      PUID: "${PUID}"
-      TZ: "${TZ}"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: "${MYSQL_USER}"
     volumes:
-      - ./db:/config
+      - ./db:/var/lib/mysql
 
 volumes:
 

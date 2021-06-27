@@ -12,11 +12,14 @@ networks:
 services:
 
   db:
-    image: mariadb
     container_name: wallabag-db
+    image: mariadb:10.6.2
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: "${MYSQL_USER}"
     volumes:
       - ./db:/var/lib/mysql
 
@@ -51,6 +54,7 @@ services:
       SYMFONY__ENV__SERVER_NAME: Wallabag
     labels:
       traefik.enable: true
+      traefik.http.routers.wallabag-api.rule: Host(`wallabag.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.routers.wallabag.middlewares: authelia, error-pages
       traefik.http.services.wallabag.loadbalancer.server.port: 80
     networks:

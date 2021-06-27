@@ -13,13 +13,13 @@ services:
 
   db:
     container_name: filerun-db
-    image: mariadb:10.1
+    image: mariadb:10.6.2
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_USER: filerun
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
       MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
-      MYSQL_DATABASE: filerun
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: "${MYSQL_USER}"
     volumes:
       - ./db:/var/lib/mysql
 

@@ -15,10 +15,10 @@ services:
     image: jc21/mariadb-aria:latest
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PW}
+      MYSQL_ROOT_PASSWORD: "${DB_PW}"
       MYSQL_DATABASE: npm
       MYSQL_USER: npm
-      MYSQL_PASSWORD: ${DB_PW}
+      MYSQL_PASSWORD: "${DB_PW}"
     volumes:
       - ./data/mysql:/var/lib/mysql
 
@@ -32,7 +32,7 @@ services:
       DB_MYSQL_HOST: nginx-db
       DB_MYSQL_PORT: 3306
       DB_MYSQL_USER: npm
-      DB_MYSQL_PASSWORD: ${DB_PW}
+      DB_MYSQL_PASSWORD: "${DB_PW}"
       DB_MYSQL_NAME: npm
       TZ: ${TZ}
     networks:

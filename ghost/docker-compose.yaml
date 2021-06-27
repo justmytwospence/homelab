@@ -13,12 +13,15 @@ services:
 
   db:
     container_name: ghost-db
-    image: mariadb:10.6.1
-    restart: always
+    image: mariadb:10.6.2
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: "${MYSQL_USER}"
     volumes:
-      - ./data:/config
+      - ./db:/var/lib/mysql
 
   ghost:
     container_name: ghost
