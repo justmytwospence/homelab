@@ -21,35 +21,32 @@ services:
     restart: unless-stopped
     command:
       - --chain=polkadot
-      - --name PolkaDocker
-      - --rpc-cors all
-      - --rpc-external
-      - --ws-external
+      - --in-peers=50
+      - --name=PolkaMcDotFace
+      - --out-peers=50
+      - --port=30333 # default 30333
+      - --prometheus-external
+      - --prometheus-port=9615 # default 9615
+      - --pruning=archive
+      - --rpc-cors=all
+      - --rpc-port=9933 # default 9933
+      - --unsafe-rpc-external
+      - --unsafe-ws-external
+      - --validator
+      - --ws-port=9944 # default 9944
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 30G
-    ports:
-      - 30333:30333 # p2p
-      - 9615:9615 # monitoring
-      - 9933:9933 # rpc
-      - 9944:9944 # ws
-    volumes:
-      - polkadot:/polkadot
-
-  polkadotui:
-    container_name: polkadotui
-    image: jacogr/polkadot-js-apps:latest
-    restart: unless-stopped
-    environment:
-      WS_URL: ws://polkadot:9944
-    labels:
-      traefik.enable: true
-      traefik.http.services.polkadotui.loadbalancer.server.port: 80
+          cpus: 2
+          memory: 16G
     networks:
       - default
-      - traefik-net
+      - prometheus-net
+    ports:
+      - 9944:9944 # ws
+      - 30333:30333 # p2p
+    volumes:
+      - polkadot:/polkadot
 
 volumes:
 
