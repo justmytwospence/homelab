@@ -1,0 +1,3 @@
+[submodule "bitcoin/electrs"]
+	path = bitcoin/electrs
+	url = https://github.com/romanz/electrs.git

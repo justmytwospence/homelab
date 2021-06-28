@@ -5,11 +5,15 @@ networks:
   default:
     name: bitcoin-net
 
+  prometheus-net:
+    external:
+      name: prometheus-net
+
 services:
 
   bitcoind:
     container_name: bitcoind
-    image: kylemanna/bitcoind:1.0.0
+    image: kylemanna/bitcoind:latest
     restart: unless-stopped
     deploy:
       resources:
@@ -22,30 +26,42 @@ services:
         max-size: 200k
         max-file: "10"
     ports:
-      - 8332:8332 # rpc
+      # - 8332:8332 # rpc
       - 8333:8333 # p2p
     volumes:
-      - ./bitcoin.conf:/bitcoin/.bitcoin/bitcoin.conf:ro
+      - ./bitcoin.conf:/bitcoin/.bitcoin/bitcoin.conf
+      - ./shared:/shared
       - bitcoin:/bitcoin/.bitcoin
 
-  # lnd:
-  #   container_name: lnd
-  #   image: lnzap/lnd:latest
-  #   restart: unless-stopped
-  #   command:
-  #     - --bitcoin.active
-  #     - --bitcoin.testnet
-  #     - --debuglevel=info
-  #     - --bitcoin.node=neutrino
-  #     - --neutrino.connect=testnet1-btcd.zaphq.io
-  #     - --neutrino.connect=testnet2-btcd.zaphq.io
-  #     - --autopilot.active
-  #     - --rpclisten=0.0.0.0:10009
-  #   ports:
-  #     - 9735:9735
-  #     - 10009:10009
-  #   volumes:
-  #     - ./lightning:/lnd
+  electrs:
+    build: electrs
+    command: electrs
+    container_name: electrs
+    restart: unless-stopped
+    depends_on:
+      bitcoind:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 4G
+    environment:
+      ELECTRS_COOKIE_FILE: /shared/.cookie
+      ELECTRS_DAEMON_RPC_ADDR: bitcoind:8332
+      ELECTRS_DB_DIR: /db
+      ELECTRS_ELECTRUM_RPC_ADDR: 0.0.0.0:51001
+      ELECTRS_JSONRPC_IMPORT: "true"
+      ELECTRS_MONITORING_ADDR: 0.0.0.0:4224
+      ELECTRS_VERBOSE: 4
+    networks:
+      - default
+      - prometheus-net
+    ports:
+      - 51001:51001
+    volumes:
+      - ./shared:/shared
+      - electrs:/db
 
 volumes:
 
@@ -54,5 +70,13 @@ volumes:
     name: bitcoin
     driver_opts:
       device: :/Bitcoin
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
+
+  electrs:
+    driver: local
+    name: electrs
+    driver_opts:
+      device: :/Electrs
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
