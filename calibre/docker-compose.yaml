@@ -1,15 +1,70 @@
 version: "3"
 
+networks:
+
+  default:
+    name: calibre-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
 services:
 
   calibre:
     container_name: calibre
     image: linuxserver/calibre:latest
     restart: unless-stopped
-    ports:
-      - 9080:8080 # web
-      - 9081:8081 # server
-      - 9090:9090 # local
+    labels:
+      traefik.enable: true
+      # GUI
+      traefik.http.routers.calibre.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.calibre.rule: "Host(`calibre.${DOMAIN}`)"
+      traefik.http.routers.calibre.service: calibre
+      traefik.http.services.calibre.loadbalancer.server.port: 8080
+      # server
+      traefik.http.routers.calibre-server.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.calibre-server.rule: "Host(`calibre-server.${DOMAIN}`)"
+      traefik.http.routers.calibre-server.service: calibre-server
+      traefik.http.services.calibre-server.loadbalancer.server.port: 8081
+      # discovery
+      traefik.http.routers.calibre-discovery.rule: "Host(`calibre-discovery.${DOMAIN}`)"
+      traefik.http.routers.calibre-discovery.service: calibre-discovery
+      traefik.http.services.calibre-discovery.loadbalancer.server.port: 9090
+    networks:
+      - default
+      - traefik-net
     volumes:
-      - "/share/Calibre Library:/config/Calibre Library"
       - ./calibre:/config
+      - "calibre:/config/Calibre Library"
+
+  calibre-web:
+    container_name: calibre-web
+    image: linuxserver/calibre-web:latest
+    restart: unless-stopped
+    environment:
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.calibre-web-opds.rule: Host(`books.${DOMAIN}`) && PathPrefix(`/opds`)
+      traefik.http.routers.calibre-web.middlewares: authelia, error-pages
+      traefik.http.routers.calibre-web.rule: "Host(`books.${DOMAIN}`)"
+      traefik.http.services.calibre-web.loadbalancer.server.port: 8083
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./calibre-web:/config
+      - calibre:/books
+
+volumes:
+
+  calibre:
+    driver: local
+    name: calibre
+    driver_opts:
+      device: :/Calibre
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

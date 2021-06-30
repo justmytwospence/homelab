@@ -5,6 +5,10 @@ networks:
   default:
     name: servarr-net
 
+  calibre-net:
+    external:
+      name: calibre-net
+
   prometheus-net:
     external:
       name: prometheus-net
@@ -39,6 +43,7 @@ services:
       TZ: "${TZ}"
       VPNSP: mullvad
     networks:
+      - calibre-net
       - default
       - prometheus-net
       - traefik-net
@@ -235,7 +240,7 @@ services:
 volumes:
 
   calibre:
-    external:
+    external: # created by calibre
       name: calibre
 
   multimedia:
