@@ -9,14 +9,11 @@ networks:
     external:
       name: prometheus-net
 
-  traefik-net:
-    external:
-      name: traefik-net
-
 services:
 
   polkadot:
     container_name: polkadot
+    dns: [ 192.168.1.1 ]
     image: parity/polkadot:latest
     restart: unless-stopped
     command:

@@ -52,9 +52,9 @@ scrape_configs:
       - target_label: __address__
         replacement: "ping-exporter:9115"
 
-  # - job_name: polkadot
-  #   static_configs:
-  #     - targets: ["polkdadot-vpn:9615"]
+  - job_name: polkadot
+    static_configs:
+      - targets: ["polkadot:9615"]
 
   - job_name: prometheus
     static_configs:
@@ -64,9 +64,9 @@ scrape_configs:
     static_configs:
       - targets: ["prysm-beacon:8080"]
 
-  # - job_name: prysm-validator
-  #   static_configs:
-  #     - targets: ["prysm-validator:8081"]
+  - job_name: prysm-validator
+    static_configs:
+      - targets: ["prysm-validator:8081"]
 
   - job_name: radarr
     static_configs:
