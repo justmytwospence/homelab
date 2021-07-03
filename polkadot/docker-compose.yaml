@@ -9,6 +9,10 @@ networks:
     external:
       name: prometheus-net
 
+  traefik-net:
+    external:
+      name: traefik-net
+
 services:
 
   polkadot:
@@ -18,18 +22,19 @@ services:
     restart: unless-stopped
     command:
       - --chain=polkadot
-      - --in-peers=50
+      - --in-peers=25
+      - --log=info
       - --name=PolkaMcDotFace
-      - --out-peers=50
+      - --out-peers=25
       - --port=30333 # default 30333
       - --prometheus-external
       - --prometheus-port=9615 # default 9615
       - --pruning=archive
       - --rpc-cors=all
+      - --rpc-external
       - --rpc-port=9933 # default 9933
-      - --unsafe-rpc-external
-      - --unsafe-ws-external
-      - --validator
+      # - --validator
+      - --ws-external
       - --ws-port=9944 # default 9944
     deploy:
       resources:
@@ -44,6 +49,24 @@ services:
       - 30333:30333 # p2p
     volumes:
       - polkadot:/polkadot
+
+  polkadotui:
+    container_name: polkadotui
+    image: jacogr/polkadot-js-apps:latest
+    restart: unless-stopped
+    depends_on:
+      polkadot:
+        condition: service_started
+    environment:
+      WS_URL: "ws://${HOST_IP}:9944"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.polkadot.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.polkadot.rule: "Host(`polkadot.${DOMAIN}`)"
+      traefik.http.services.polkadot.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik-net
 
 volumes:
 
