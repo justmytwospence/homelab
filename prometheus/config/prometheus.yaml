@@ -13,10 +13,31 @@ scrape_configs:
   #   static_configs:
   #     - targets: ["deluge-exporter:9354"]
 
-  - job_name: geth
+  - job_name: eth-mainnet-beacon
+    static_configs:
+      - targets: ["eth_mainnet_beacon_1:8080"]
+
+  - job_name: eth-mainnet-geth
     metrics_path: /debug/metrics/prometheus
     static_configs:
-      - targets: ["geth:6060"]
+      - targets: ["eth_mainnet_geth_1:6060"]
+
+  - job_name: eth-mainnet-validator
+    static_configs:
+      - targets: ["eth_mainnet_validator_1:8081"]
+
+  - job_name: eth-testnet-beacon
+    static_configs:
+      - targets: ["eth_testnet_beacon_1:8080"]
+
+  - job_name: eth-testnet-geth
+    metrics_path: /debug/metrics/prometheus
+    static_configs:
+      - targets: ["eth_testnet_geth_1:6060"]
+
+  - job_name: eth-testnet-validator
+    static_configs:
+      - targets: ["eth_testnet_validator_1:8081"]
 
   - job_name: jaeger
     static_configs:
@@ -59,14 +80,6 @@ scrape_configs:
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]
-
-  - job_name: prysm-beacon
-    static_configs:
-      - targets: ["prysm-beacon:8080"]
-
-  - job_name: prysm-validator
-    static_configs:
-      - targets: ["prysm-validator:8081"]
 
   - job_name: radarr
     static_configs:

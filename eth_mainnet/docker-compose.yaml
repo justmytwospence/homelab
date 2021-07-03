@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: ethereum-test-net
+    name: eth-main-net
 
   prometheus-net:
     external:
@@ -22,7 +22,6 @@ services:
     command:
       - --cache=8192
       - --datadir=/data
-      - --goerli # testnet
       - --identity=NodeyMcNodeFace
       - --ipcpath=/root/.ethereum/geth.ipc
       - --log.debug=true
@@ -30,7 +29,7 @@ services:
       - --metrics # /debug/metrics/prometheus
       - --metrics.addr=0.0.0.0
       - --metrics.port=6060 # default 6060
-      - --port=30304 # default 30303
+      - --port=30303 # default 30303
       - --syncmode=fast
     deploy:
       resources:
@@ -46,17 +45,17 @@ services:
       - default
       - prometheus-net
     ports:
-      - 30304:30304 # p2p
+      - 30303:30303 # p2p
     volumes:
       - ./geth:/root/.ethereum
       - geth:/data
 
-  prysm-beacon:
+  beacon:
     dns: [ 192.168.1.1 ] # bypass pihole to unbound
     image: prysmaticlabs/prysm-beacon-chain:stable
     restart: unless-stopped
     command:
-      - "--fallback-web3provider=https://goerli.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}"
+      - "--fallback-web3provider=https://mainnet.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}"
       - --accept-terms-of-use
       - --datadir=/data
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
@@ -65,9 +64,8 @@ services:
       - --monitoring-host=0.0.0.0
       - --monitoring-port=8080 # default 8080/metrics
       - --p2p-max-peers=50
-      - --p2p-tcp-port=13001 # default 13000
-      - --p2p-udp-port=12001 # default 12000
-      - --pyrmont # testnet
+      - --p2p-tcp-port=13000 # default 13000
+      - --p2p-udp-port=12000 # default 12000
       - --rpc-host=0.0.0.0 # default 0.0.0.0
       - --rpc-port=4000 # default 4000
       - --verbosity=debug # default info
@@ -88,27 +86,26 @@ services:
       - default
       - prometheus-net
     ports:
-      - 12001:12001 # p2p udp
-      - 13001:13001 # p2p tcp
+      - 12000:12000 # p2p udp
+      - 13000:13000 # p2p tcp
     volumes:
       - ./geth:/geth
       - beacon:/data
 
-  prysm-validator:
+  validator:
     dns: [ 192.168.1.1 ] # bypass pihole to unbound
     image: prysmaticlabs/prysm-validator:stable
     restart: unless-stopped
     command:
       - --accept-terms-of-use
-      - --beacon-rpc-gateway-provider=prysm-beacon:3500
-      - --beacon-rpc-provider=prysm-beacon:4000
+      - --beacon-rpc-gateway-provider=beacon:3500
+      - --beacon-rpc-provider=beacon:4000
       - --datadir=/data
       - --graffiti='Hakuna Matata'
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
       - --grpc-gateway-port=7500 # default 7500
       - --monitoring-host=0.0.0.0 # default 127.0.0.1
       - --monitoring-port=8081 # /metrics
-      - --pyrmont # testnet
       - --rpc-host=0.0.0.0 # default 127.0.0.1
       - --rpc-port=7000 # default 7000
       - --verbosity=debug # default info
@@ -116,7 +113,7 @@ services:
       - --web
       - --write-wallet-password-on-web-onboarding
     depends_on:
-      prysm-beacon:
+      beacon:
         condition: service_started
     deploy:
       resources:
@@ -125,9 +122,9 @@ services:
           memory: 16G # 16G recommended for Prysm
     labels:
       traefik.enable: true
-      traefik.http.routers.prysm.middlewares: authelia, error-pages, whitelist-lan@file
-      traefik.http.routers.prysm.rule: "Host(`pyrmont.${DOMAIN}`)"
-      traefik.http.services.prysm.loadbalancer.server.port: 7500
+      traefik.http.routers.prysm-mainnet.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.prysm-mainnet.rule: "Host(`prysm-mainnet.${DOMAIN}`)"
+      traefik.http.services.prysm-mainnet.loadbalancer.server.port: 7500
     logging:
       driver: json-file
       options:
@@ -145,13 +142,13 @@ volumes:
   beacon:
     driver: local
     driver_opts:
-      device: :/Pyrmont
+      device: :/Beacon
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
 
   geth:
     driver: local
     driver_opts:
-      device: :/Goerli
+      device: :/Geth
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
