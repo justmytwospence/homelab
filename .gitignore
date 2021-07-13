@@ -22,7 +22,6 @@
 !grafana/provisioning/
 !grafana/provisioning/**
 
-!homer/assets/
 !homer/assets/config.yaml
 
 !monero/bitmonero.conf
@@ -33,11 +32,7 @@
 !tick/telegraf/
 !tick/telegraf/*
 
-!traefik/authelia/
 !traefik/authelia/configuration.yml
 
 !traefik/dynamic/
 !traefik/dynamic/*
-
-!pihole/unbound/
-!pihole/unbound/forward-records.conf
