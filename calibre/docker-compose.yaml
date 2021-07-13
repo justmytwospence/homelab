@@ -5,9 +5,17 @@ networks:
   default:
     name: calibre-net
 
+  deluge-servarr-net:
+    external:
+      name: deluge-servarr-net
+
   traefik-net:
     external:
       name: traefik-net
+
+  servarr-net:
+    external:
+      name: servarr-net
 
 services:
 
@@ -53,6 +61,34 @@ services:
       - traefik-net
     volumes:
       - ./calibre-web:/config
+      - calibre:/books
+
+  readarr:
+    container_name: readarr
+    image: hotio/readarr:nightly
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 1G
+    environment:
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
+      UMASK: 002
+    labels:
+      traefik.enable: true
+      traefik.http.routers.readarr.middlewares: authelia, error-pages
+      traefik.http.services.readarr.loadbalancer.server.port: 8787
+    networks:
+      - default
+      - deluge-servarr-net
+      - servarr-net
+      - traefik-net
+    volumes:
+      - ~/downloads:/downloads
+      - ./readarr:/config
       - calibre:/books
 
 volumes:
