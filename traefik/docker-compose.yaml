@@ -80,6 +80,8 @@ services:
     networks:
       - default
       - prometheus-net
+    volumes:
+      - jaeger-tmp:/tmp
 
   redis:
     container_name: authelia-redis
@@ -89,6 +91,8 @@ services:
       TZ: "${TZ}"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+    volumes:
+      - redis:/data
 
   traefik:
     container_name: traefik
@@ -107,6 +111,7 @@ services:
       # internal endpoints
       TRAEFIK_API: "true"
       TRAEFIK_API_DEBUG: "false"
+      TRAEFIK_API_INSECURE: "true"
       TRAEFIK_PING: "true"
       # metrics
       TRAEFIK_ENTRYPOINTS_METRICS_ADDRESS: :8082
@@ -115,7 +120,7 @@ services:
       TRAEFIK_METRICS_PROMETHEUS_ENTRYPOINT: metrics
       # logging
       TRAEFIK_ACCESSLOG_FILEPATH: /var/log/access.log
-      TRAEFIK_LOG_LEVEL: info
+      TRAEFIK_LOG_LEVEL: INFO
       # tracing
       TRAEFIK_TRACING_JAEGER: "true"
       TRAEFIK_TRACING_JAEGER_COLLECTOR_ENDPOINT: http://jaeger:14268/api/traces?format=jaeger.thrift
@@ -139,8 +144,6 @@ services:
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_PROVIDER: namecheap
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: "${ACME_EMAIL}"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE: /letsencrypt/acme.json
-      # wireguard VPN entrypoint
-      TRAEFIK_ENTRYPOINTS_WIREGUARD_ADDRESS: :51820/udp
       # docker provider
       TRAEFIK_PROVIDERS_DOCKER_DEFAULTRULE: Host(`{{ index .Labels "com.docker.compose.service" }}.${DOMAIN}`)
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: tcp://traefik-docker-proxy:2375
@@ -176,8 +179,15 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 51820:51820/udp
     volumes:
       - ./dynamic:/dynamic
       - ./letsencrypt:/letsencrypt
       - /var/log/traefik:/var/log # mount logs for fail2ban
+
+volumes:
+
+  redis:
+    name: authelia-redis
+
+  jaeger-tmp:
+    name: jaeger-tmp
