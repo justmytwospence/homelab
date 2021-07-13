@@ -2,8 +2,20 @@ version: "3"
 
 networks:
 
+  calibre-net:
+    external:
+      name: calibre-net
+
   default:
     name: organizr-net
+
+  deluge-servarr-net:
+    external:
+      name: deluge-servarr-net
+
+  servarr-net:
+    external:
+      name: servarr-net
 
   traefik-net:
     external:
@@ -24,7 +36,10 @@ services:
       traefik.http.routers.organizr.middlewares: authelia, error-pages
       traefik.http.services.organizr.loadbalancer.server.port: 80
     networks:
+      - calibre-net
       - default
+      - deluge-servarr-net
+      - servarr-net
       - traefik-net
     volumes:
       - ./organizr:/config
