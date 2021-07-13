@@ -1,0 +1,30 @@
+version: "3"
+
+networks:
+
+  default:
+    name: organizr-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  organizr:
+    container_name: organizr
+    image: organizr/organizr
+    restart: unless-stopped
+    environment:
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.organizr.middlewares: authelia, error-pages
+      traefik.http.services.organizr.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik-net
+    volumes:
+      - ./organizr:/config

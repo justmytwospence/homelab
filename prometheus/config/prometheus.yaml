@@ -9,10 +9,6 @@ scrape_configs:
     static_configs:
       - targets: ["cadvisor:8080"]
 
-  # - job_name: deluge
-  #   static_configs:
-  #     - targets: ["deluge-exporter:9354"]
-
   - job_name: eth-mainnet-beacon
     static_configs:
       - targets: ["eth_mainnet_beacon_1:8080"]
@@ -80,14 +76,6 @@ scrape_configs:
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]
-
-  - job_name: radarr
-    static_configs:
-      - targets: ["servarr-vpn:9708"]
-
-  - job_name: sonarr
-    static_configs:
-      - targets: ["servarr-vpn:9707"]
 
   - job_name: speedtest
     scrape_interval: 30m

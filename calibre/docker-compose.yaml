@@ -15,25 +15,21 @@ services:
     container_name: calibre
     image: linuxserver/calibre:latest
     restart: unless-stopped
+    environment:
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
     labels:
       traefik.enable: true
-      # GUI
       traefik.http.routers.calibre.middlewares: authelia, error-pages, whitelist-lan@file
       traefik.http.routers.calibre.rule: "Host(`calibre.${DOMAIN}`)"
-      traefik.http.routers.calibre.service: calibre
       traefik.http.services.calibre.loadbalancer.server.port: 8080
-      # server
-      traefik.http.routers.calibre-server.middlewares: authelia, error-pages, whitelist-lan@file
-      traefik.http.routers.calibre-server.rule: "Host(`calibre-server.${DOMAIN}`)"
-      traefik.http.routers.calibre-server.service: calibre-server
-      traefik.http.services.calibre-server.loadbalancer.server.port: 8081
-      # discovery
-      traefik.http.routers.calibre-discovery.rule: "Host(`calibre-discovery.${DOMAIN}`)"
-      traefik.http.routers.calibre-discovery.service: calibre-discovery
-      traefik.http.services.calibre-discovery.loadbalancer.server.port: 9090
     networks:
       - default
       - traefik-net
+    ports:
+      - 8081:8081 # server
+      - 9090:9090 # local discovery
     volumes:
       - ./calibre:/config
       - "calibre:/config/Calibre Library"

@@ -9,80 +9,45 @@ networks:
     external:
       name: traefik-net
 
+  prometheus-net:
+    external:
+      name: prometheus-net
+
 services:
 
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
-    network_mode: "service:gluetun"
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_started
     deploy:
       resources:
         limits:
-          cpus: "0.2"
+          cpus: 1
           memory: 4G
     environment:
-      # DELUGE_LOGLEVEL: debug
-      PGID: ${PGID}
-      PUID: ${PUID}
-      TZ: ${TZ}
+      DELUGE_LOGLEVEL: INFO
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
     labels:
       traefik.enable: true
-      traefik.http.routers.deluge.rule: Host(`deluge.${DOMAIN}`)
-      traefik.http.routers.deluge.service: deluge
+      traefik.http.routers.deluge.middlewares: authelia, error-pages
+      traefik.http.routers.deluge.rule: "Host(`deluge.${DOMAIN}`)"
       traefik.http.services.deluge.loadbalancer.server.port: 8112
-    volumes:
-      - ./deluge:/config
-      - /mnt/ssd1/deluge:/downloads
-
-  # deluge-exporter:
-  #   container_name: deluge-exporter
-  #   image: tobbez/deluge_exporter:2
-  #   restart: unless-stopped
-  #   environment:
-  #     DELUGE_HOST: deluge-vpn
-  #     DELUGE_PASSWORD: ${DELUGE_PASSWORD}
-  #     DELUGE_PORT: 58846
-  #     DELUGE_USER: ${DELUGE_USER}
-  #     LISTEN_PORT: 9354
-  #     PER_TORRENT_METRICS: 0
-  #   networks:
-  #     - default
-  #     - deluge-net
-
-  gluetun:
-    container_name: deluge-vpn
-    image: qmcgaw/gluetun:latest
-    restart: always
-    cap_add:
-      - NET_ADMIN
-    environment:
-      BLOCK_ADS: "on"
-      BLOCK_MALICIOUS: "on"
-      BLOCK_SURVEILLANCE: "on"
-      CITY: ${CITY}
-      COUNTRY: ${COUNTRY}
-      DOT: "on"
-      DOT_CACHING: "on"
-      DOT_PROVIDERS: quad9
-      FIREWALL: "on"
-      FIREWALL_INPUT_PORTS: 8112
-      FIREWALL_VPN_INPUT_PORTS: ${FIREWALL_VPN_INPUT_PORTS}
-      OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
-      OPENVPN_USER: ${OPENVPN_USER}
-      OPENVPN_VERBOSITY: 2
-      PGID: ${PGID}
-      PUID: ${PUID}
-      SERVER_HOSTNAME: ${SERVER_HOSTNAME}
-      TZ: ${TZ}
-      VPNSP: ${VPNSP}
     networks:
       - default
       - traefik-net
-    ports:
-      - 58846:58846 # Deluge
     volumes:
-      - ./gluetun:/gluetun
+      - ./deluge:/config
+      - ./downloads:/downloads
+      - distros:/downloads/distros
+
+volumes:
+
+  distros:
+    driver: local
+    name: distros
+    driver_opts:
+      device: :/Distros
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

@@ -5,81 +5,55 @@ networks:
   default:
     name: servarr-net
 
-  calibre-net:
-    external:
-      name: calibre-net
-
-  prometheus-net:
-    external:
-      name: prometheus-net
-
   traefik-net:
     external:
       name: traefik-net
 
 services:
 
-  gluetun:
-    container_name: servarr-vpn
-    image: qmcgaw/gluetun:v3.18.0
+  bazarr:
+    container_name: bazarr
+    image: linuxserver/bazarr:latest
     restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
     environment:
-      BLOCK_ADS: "on"
-      BLOCK_MALICIOUS: "on"
-      BLOCK_SURVEILLANCE: "on"
-      DOT: "on"
-      DOT_CACHING: "on"
-      DOT_PROVIDERS: quad9
-      FIREWALL: "on"
-      FIREWALL_INPUT_PORTS: 9091
-      FIREWALL_VPN_INPUT_PORTS: "${TRANSMISSION_PORT_FORWARD}"
-      OPENVPN_USER: "${OPENVPN_USER}"
-      OPENVPN_VERBOSITY: 2
       PGID: "${PGID}"
       PUID: "${PUID}"
-      SERVER_HOSTNAME: "${SERVER_HOSTNAME}"
       TZ: "${TZ}"
-      VPNSP: mullvad
+    labels:
+      traefik.enable: true
+      traefik.http.routers.bazarr.middlewares: authelia, error-pages
+      traefik.http.services.bazarr.loadbalancer.server.port: 6767
     networks:
-      - calibre-net
       - default
-      - prometheus-net
       - traefik-net
     volumes:
-      - ./gluetun:/gluetun
+      - ./bazarr:/config
+      - multimedia:/multimedia
 
   jackett:
     container_name: jackett
     image: linuxserver/jackett:latest
-    network_mode: "service:gluetun"
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    labels:
-      traefik.enable: true
-      traefik.http.routers.jackett-api.rule: Host(`jackett.${DOMAIN}`) && PathPrefix(`/api`)
-      traefik.http.routers.jackett.middlewares: authelia, error-pages
-      traefik.http.routers.jackett.rule: "Host(`jackett.${DOMAIN}`)"
-      traefik.http.services.jackett.loadbalancer.server.port: 9117
     environment:
       AUTO_UPDATE: "true"
       PGID: "${PGID}"
       PUID: "${PUID}"
       TZ: "${TZ}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jackett-api.rule: Host(`jackett.${DOMAIN}`) && PathPrefix(`/api`)
+      traefik.http.routers.jackett.middlewares: authelia, error-pages
+      traefik.http.services.jackett.loadbalancer.server.port: 9117
+    networks:
+      - default
+      - traefik-net
     volumes:
       - ./jackett:/config
 
   prowlarr:
     container_name: prowlarr
     image: linuxserver/prowlarr:nightly
-    network_mode: "service:gluetun"
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
     environment:
       PGID: "${PGID}"
       PUID: "${PUID}"
@@ -87,23 +61,17 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.prowlarr.middlewares: authelia, error-pages
-      traefik.http.routers.prowlarr.rule: "Host(`prowlarr.${DOMAIN}`)"
       traefik.http.services.prowlarr.loadbalancer.server.port: 9696
+    networks:
+      - default
+      - traefik-net
     volumes:
       - ./prowlarr:/config
 
   radarr:
     container_name: radarr
     image: linuxserver/radarr:latest
-    network_mode: "service:gluetun"
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-      jackett:
-        condition: service_started
-      transmission:
-        condition: service_started
     deploy:
       resources:
         limits:
@@ -117,68 +85,19 @@ services:
       traefik.enable: true
       traefik.http.routers.radarr-api.rule: Host(`radarr.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.routers.radarr.middlewares: authelia, error-pages
-      traefik.http.routers.radarr.rule: "Host(`radarr.${DOMAIN}`)"
       traefik.http.services.radarr.loadbalancer.server.port: 7878
+    networks:
+      - default
+      - traefik-net
     volumes:
       - ./radarr:/config
-      - ./downloads/transmission:/downloads
       - multimedia:/multimedia
-
-  radarr-exporter:
-    command: ["exportarr", "radarr"]
-    container_name: radarr-exporter
-    image: ghcr.io/onedr0p/exportarr:latest
-    network_mode: "service:gluetun"
-    restart: unless-stopped
-    environment:
-      APIKEY: "${RADARR_API_KEY}"
-      PORT: 9708
-      URL: "http://localhost:7878"
-
-  readarr:
-    container_name: readarr
-    image: hotio/readarr:nightly
-    network_mode: "service:gluetun"
-    restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-      jackett:
-        condition: service_started
-      transmission:
-        condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: 1
-          memory: 1G
-    environment:
-      PGID: "${PGID}"
-      PUID: "${PUID}"
-      TZ: "${TZ}"
-      UMASK: 002
-    labels:
-      traefik.enable: true
-      traefik.http.routers.readarr.middlewares: authelia, error-pages
-      traefik.http.routers.readarr.rule: "Host(`readarr.${DOMAIN}`)"
-      traefik.http.services.readarr.loadbalancer.server.port: 8787
-    volumes:
-      - ./downloads/transmission:/downloads
-      - ./readarr:/config
-      - calibre:/books
+      - ~/downloads:/downloads
 
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
-    network_mode: "service:gluetun"
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-      jackett:
-        condition: service_started
-      transmission:
-        condition: service_started
     deploy:
       resources:
         limits:
@@ -192,56 +111,16 @@ services:
       traefik.enable: true
       traefik.http.routers.sonarr-api.rule: Host(`sonarr.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.routers.sonarr.middlewares: authelia, error-pages
-      traefik.http.routers.sonarr.rule: "Host(`sonarr.${DOMAIN}`)"
       traefik.http.services.sonarr.loadbalancer.server.port: 8989
+    networks:
+      - default
+      - traefik-net
     volumes:
-      - ./downloads/transmission:/downloads
       - ./sonarr:/config
       - multimedia:/multimedia
-
-  sonarr-exporter:
-    command: ["exportarr", "sonarr"]
-    container_name: sonarr-exporter
-    image: ghcr.io/onedr0p/exportarr:latest
-    network_mode: "service:gluetun"
-    restart: unless-stopped
-    environment:
-      APIKEY: "${SONARR_API_KEY}"
-      ENABLE_EPISODE_QUALITY_METRICS: "false"
-      PORT: 9707
-      URL: "http://localhost:8989"
-
-  transmission:
-    container_name: transmission-servarr
-    image: linuxserver/transmission:version-3.00-r2
-    network_mode: "service:gluetun"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 8G
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    environment:
-      PASS: "${TRANSMISSION_PASS}"
-      PGID: "${PGID}"
-      PUID: "${PUID}"
-      TZ: "${TZ}"
-      USER: "${TRANSMISSION_USER}"
-    labels:
-      traefik.enable: true
-      traefik.http.routers.transmission-servarr.rule: "Host(`servarr.${DOMAIN}`)"
-      traefik.http.services.transmission-servarr.loadbalancer.server.port: 9091
-    volumes:
-      - ./downloads/transmission:/downloads
-      - ./transmission:/config
+      - ~/downloads:/downloads
 
 volumes:
-
-  calibre:
-    external: # created by calibre
-      name: calibre
 
   multimedia:
     driver: local
