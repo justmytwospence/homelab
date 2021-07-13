@@ -1,0 +1,49 @@
+version: "3"
+
+networks:
+
+  default:
+    name: netdata-net
+
+  traefik-net:
+    external:
+      name: traefik-net
+
+services:
+
+  docker-proxy:
+    container_name: netdata-docker-proxy
+    image: ghcr.io/tecnativa/docker-socket-proxy:0.1
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  netdata:
+    container_name: netdata
+    image: netdata/netdata:stable
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+    environment:
+      DOCKER_HOST: netdata-docker-proxy:2375
+    labels:
+      traefik.enable: true
+      traefik.http.routers.netdata.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.services.netdata.loadbalancer.server.port: 19999
+    networks:
+      - default
+      - traefik-net
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      # need to be owned by 201
+      - ./cache:/var/cache/netdata
+      - ./config:/etc/netdata
+      - ./lib:/var/lib/netdata
+      - /etc/group:/host/etc/group:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /etc/passwd:/host/etc/passwd:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
