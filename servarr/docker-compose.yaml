@@ -21,6 +21,7 @@ services:
       TZ: "${TZ}"
     labels:
       traefik.enable: true
+      traefik.http.routers.bazarr-api.rule: Host(`bazarr.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.routers.bazarr.middlewares: authelia, error-pages
       traefik.http.services.bazarr.loadbalancer.server.port: 6767
     networks:
