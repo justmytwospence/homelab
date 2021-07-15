@@ -1,12 +1,21 @@
 http:
   routers:
 
+    netdata:
+      rule: Host(`netdata.{{ env "DOMAIN" }}`)
+      middlewares: authelia@docker, error-pages@docker
+      service: netdata
+
     plex:
       rule: Host(`plex.{{ env "DOMAIN" }}`)
       service: plex
 
   services:
 
+    netdata:
+      loadBalancer:
+        servers:
+          - url: http://{{ env "OPNSENSE_IP" }}:19999
     plex:
       loadBalancer:
         servers:

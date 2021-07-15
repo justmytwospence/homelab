@@ -152,6 +152,7 @@ services:
       TRAEFIK_PROVIDERS_DOCKER_WATCH: "true"
       # file provider
       DOMAIN: "${DOMAIN}"
+      OPNSENSE_IP: "${OPNSENSE_IP}"
       QNAP_IP: "${QNAP_IP}"
       TRAEFIK_PROVIDERS_FILE_DIRECTORY: /dynamic
       TRAEFIK_PROVIDERS_FILE_WATCH: "true"
