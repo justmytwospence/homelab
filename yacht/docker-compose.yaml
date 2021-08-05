@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: yacht-net
+    name: yacht
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -34,7 +34,7 @@ services:
       docker-proxy:
         condition: service_started
     environment:
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_EMAIL: "${ADMIN_EMAIL}"
       DOCKER_HOST: tcp://yacht-docker-proxy:2375
     labels:
       traefik.enable: true
@@ -42,6 +42,6 @@ services:
       traefik.http.services.yacht.loadbalancer.server.port: 8000
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config:/config

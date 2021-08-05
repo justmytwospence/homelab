@@ -3,15 +3,15 @@ version: "3"
 networks:
 
   default:
-    name: jupyter-net
+    name: jupyter
 
-  prometheus-net:
+  prometheus:
     external:
-      name: prometheus-net
+      name: prometheus
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -41,7 +41,7 @@ services:
       traefik.http.services.jupyter.loadbalancer.server.port: 8888
     networks:
       - default
-      - prometheus-net
-      - traefik-net
+      - prometheus
+      - traefik
     volumes:
       - ./home:/home/${NB_USER}/work

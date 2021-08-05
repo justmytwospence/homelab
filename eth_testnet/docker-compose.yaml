@@ -2,28 +2,29 @@ version: "3"
 
 networks:
 
-  default:
-    name: eth-test-net
-
-  prometheus-net:
+  prometheus:
     external:
-      name: prometheus-net
+      name: prometheus
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
   geth:
-    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    dns: [ 192.168.1.1 ] # unbound
     image: ethereum/client-go:stable
     restart: unless-stopped
     command:
       - --cache=8192
       - --datadir=/data
       - --goerli # testnet
-      - --identity=NodeyMcNodeFace
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.corsdomain=moz-extension://0d6948d6-4cab-4438-83f5-b74012565eb3 # MetaMask
+      - --http.port=8546 # default 8545
+      - --identity=${IDENTITY}
       - --ipcpath=/root/.ethereum/geth.ipc
       - --log.debug=true
       - --maxpeers=50
@@ -44,21 +45,22 @@ services:
         max-size: 200k
     networks:
       - default
-      - prometheus-net
+      - prometheus
     ports:
+      - 8546:8546 # rpc
       - 30304:30304 # p2p
     volumes:
       - ./geth:/root/.ethereum
       - geth:/data
 
   beacon:
-    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    dns: [ 192.168.1.1 ] # unbound
     image: prysmaticlabs/prysm-beacon-chain:stable
     restart: unless-stopped
     command:
-      - "--fallback-web3provider=https://goerli.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}"
       - --accept-terms-of-use
       - --datadir=/data
+      - --fallback-web3provider=https://mainnet.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
       - --grpc-gateway-port=3500 # default 3500
       - --http-web3provider=/geth/geth.ipc
@@ -86,7 +88,7 @@ services:
         max-size: 200k
     networks:
       - default
-      - prometheus-net
+      - prometheus
     ports:
       - 12001:12001 # p2p udp
       - 13001:13001 # p2p tcp
@@ -95,7 +97,7 @@ services:
       - beacon:/data
 
   validator:
-    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    dns: [ 192.168.1.1 ] # unbound
     image: prysmaticlabs/prysm-validator:stable
     restart: unless-stopped
     command:
@@ -103,7 +105,7 @@ services:
       - --beacon-rpc-gateway-provider=beacon:3500
       - --beacon-rpc-provider=beacon:4000
       - --datadir=/data
-      - --graffiti='Hakuna Matata'
+      - --graffiti=${GRAFFITI}
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
       - --grpc-gateway-port=7500 # default 7500
       - --monitoring-host=0.0.0.0 # default 127.0.0.1
@@ -125,9 +127,9 @@ services:
           memory: 16G # 16G recommended for Prysm
     labels:
       traefik.enable: true
-      traefik.http.routers.prysm-testnet.middlewares: authelia, error-pages, whitelist-lan@file
-      traefik.http.routers.prysm-testnet.rule: "Host(`prysm-testnet.${DOMAIN}`)"
-      traefik.http.services.prysm-testnet.loadbalancer.server.port: 7500
+      traefik.http.routers.prysm-mainnet.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.prysm-mainnet.rule: "Host(`prysm-mainnet.${DOMAIN}`)"
+      traefik.http.services.prysm-mainnet.loadbalancer.server.port: 7500
     logging:
       driver: json-file
       options:
@@ -135,8 +137,8 @@ services:
         max-size: 200k
     networks:
       - default
-      - prometheus-net
-      - traefik-net
+      - prometheus
+      - traefik
     volumes:
       - ./validator:/data
 

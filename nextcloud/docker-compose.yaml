@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: nextcloud-net
+    name: nextcloud
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -22,8 +22,8 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./app:/var/www/html
       - ./data:/data
+      - ./nextcloud:/var/www/html
 
   db:
     container_name: nextcloud-db
@@ -32,16 +32,16 @@ services:
     environment:
       POSTGRES_DB: nextcloud
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_USER: nextcloud
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      test: ["CMD", "pg_isready", "-U", "nextcloud"]
     volumes:
       - ./db/postgres.conf:/etc/postgresql/postgresql.conf
       - ./db/pgdata:/var/lib/postgresql/data
 
   nextcloud:
     container_name: nextcloud
-    image: nextcloud:latest
+    image: nextcloud:21
     restart: unless-stopped
     depends_on:
       db:
@@ -52,30 +52,33 @@ services:
       NEXTCLOUD_ADMIN_PASSWORD: "${NEXTCLOUD_ADMIN_PASSWORD}"
       NEXTCLOUD_ADMIN_USER: "${NEXTCLOUD_ADMIN_USER}"
       NEXTCLOUD_DATA_DIR: /data
-      NEXTCLOUD_TRUSTED_DOMAINS: "${NEXTCLOUD_TRUSTED_DOMAINS}"
+      NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.${DOMAIN}
       OVERWRITEPROTOCOL: https
-      PHP_UPLOAD_LIMIT: 2G
+      PHP_MEMORY_LIMIT: 4G
+      PHP_UPLOAD_LIMIT: 4G
       POSTGRES_DB: nextcloud
       POSTGRES_HOST: nextcloud-db
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_USER: nextcloud
       REDIS_HOST: nextcloud-redis
       REDIS_HOST_PASSWORD: "${REDIS_HOST_PASSWORD}"
+      SMTP_HOST: "${SMTP_HOST}"
+      SMTP_NAME: "${SMTP_NAME}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
+      SMTP_SECURE: STARTTLS
     labels:
       traefik.enable: true
       traefik.http.middlewares.dav.redirectregex.permanent: true
-      traefik.http.middlewares.dav.redirectregex.regex: ^https://(.*)/.well-known/(card|cal)dav
-      traefik.http.middlewares.dav.redirectregex.replacement: https://$${1}/remote.php/dav/
+      traefik.http.middlewares.dav.redirectregex.regex: "https://(.*)/.well-known/(card|cal)dav"
+      traefik.http.middlewares.dav.redirectregex.replacement: "https://$${1}/remote.php/dav/"
       traefik.http.services.nextcloud.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
-      - ./app:/var/www/html
       - ./data:/data
-      - calibre:/calibre
+      - ./nextcloud:/var/www/html
       - documents:/documents
-      - gpx:/gpx
       - photos:/photos
 
   redis:
@@ -85,30 +88,16 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+    volumes:
+      - redis:/data
 
 volumes:
-
-  calibre:
-    driver: local
-    name: calibre
-    driver_opts:
-      device: :/Calibre
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
 
   documents:
     driver: local
     name: documents
     driver_opts:
       device: :/Documents
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
-
-  gpx:
-    driver: local
-    name: gpx
-    driver_opts:
-      device: :/GPX
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
 
@@ -119,3 +108,6 @@ volumes:
       device: :/Photos
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
+
+  redis:
+    name: nextcloud-redis

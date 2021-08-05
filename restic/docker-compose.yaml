@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: restic-net
+    name: restic
 
 services:
 

@@ -3,15 +3,15 @@ version: "3"
 networks:
 
   default:
-    name: librephotos-net
+    name: librephotos
 
-  nextcloud-net:
+  nextcloud:
     external:
-      name: nextcloud-net
+      name: nextcloud
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -43,7 +43,7 @@ services:
       WEB_CONCURRENCY: 2
     networks:
       - default
-      - nextcloud-net
+      - nextcloud
     volumes:
       - ./cache:/root/.cache
       - ./photos:/data # photos
@@ -83,7 +83,7 @@ services:
       traefik.http.routers.librephotos.rule: Host(`librephotos.${DOMAIN}`)
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./photos:/data
       - ./protected_media:/protected_media
@@ -95,3 +95,10 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+    volumes:
+      - redis:/data
+
+volumes:
+
+  redis:
+    name: librephotos-redis

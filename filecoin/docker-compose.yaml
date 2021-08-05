@@ -1,0 +1,32 @@
+version: "3"
+
+networks:
+
+  default:
+    name: filecoin
+
+services:
+
+  lotus:
+    container_name: lotus
+    image: glif/lotus:v1.10.0
+    restart: unless-stopped
+    environment:
+      INFRA_IMPORT_SNAPSHOT: "true"
+      INFRA_LOTUS_DAEMON: "true"
+      INFRA_LOTUS_HOME: /home/lotus_user
+      INFRA_LOTUS_LITE: "true"
+      INFRA_SYNC: "true"
+      SNAPSHOTURL: https://fil-chain-snapshots-fallback.s3.amazonaws.com/mainnet/minimal_finality_stateroots_latest.car
+    volumes:
+      - lotus:/home/lotus_user
+
+volumes:
+
+  lotus:
+    driver: local
+    name: lotus
+    driver_opts:
+      device: :/Lotus
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

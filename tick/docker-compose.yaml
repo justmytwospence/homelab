@@ -3,15 +3,15 @@ version: "3"
 networks:
 
   default:
-    name: tick-net
+    name: tick
 
-  grafana-net:
+  grafana:
     external:
-      name: grafana-net
+      name: grafana
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -27,11 +27,11 @@ services:
       KAPACITOR_URL: http://kapacitor:9092
     labels:
       traefik.enable: true
-      traefik.http.routers.chronograf.middlewares: authelia
+      traefik.http.routers.chronograf.middlewares: authelia, error-pages
       traefik.http.services.chronograf.loadbalancer.server.port: 8888
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - chronograf:/var/lib/chronograf
 
@@ -62,12 +62,12 @@ services:
       INFLUXD_REPORTING_DISABLED: "true"
     labels:
       traefik.enable: true
-      traefik.http.routers.influxdb.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.influxdb.middlewares: authelia, error-pages
       traefik.http.services.influxdb.loadbalancer.server.port: 8086
     networks:
       - default
-      - grafana-net
-      - traefik-net
+      - grafana
+      - traefik
     ports:
       - 8086:8086 # needed because telegraf is on host network
     volumes:
@@ -89,7 +89,7 @@ services:
       KAPACITOR_REPORTING_ENABLED: "false"
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - kapacitor:/var/lib/kapacitor
 

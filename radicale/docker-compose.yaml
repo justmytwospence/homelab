@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: radicale-net
+    name: radicale
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -33,7 +33,7 @@ services:
       traefik.http.services.radicale.loadbalancer.server.port: 5232
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config:/etc/radicate/config
       - ./data:/data

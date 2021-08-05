@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: bitwarden-net
+    name: bitwarden
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -16,12 +16,12 @@ services:
     image: vaultwarden/server:latest
     restart: unless-stopped
     environment:
-      SIGNUPS_ALLOWED: "true"
+      SIGNUPS_ALLOWED: "false"
       WEBSOCKET_ENABLED: "true"
     labels:
       traefik.enable: true
-      traefik.http.routers.bitwarden.middlewares: lan-only
+      traefik.http.routers.bitwarden.middlewares: authelia, error-pages, lan-only
       traefik.http.services.bitwarden.loadbalancer.service.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik

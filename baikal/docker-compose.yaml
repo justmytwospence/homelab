@@ -1,0 +1,29 @@
+version: "3"
+
+networks:
+
+  default:
+    name: baikal
+
+  traefik:
+    external:
+      name: traefik
+
+services:
+
+  baikal:
+    container_name: baikal
+    image: ckulka/baikal:nginx
+    restart: always
+    labels:
+      traefik.enable: true
+      traefik.http.routers.baikal.middlewares: authelia, error-pages
+      traefik.http.services.baikal.loadbalancer.server.port: 80
+    networks:
+      - default
+      - traefik
+    volumes:
+      # mkdir -p config data/db
+      # chown -R 101:101 config data
+      - ./config:/var/www/baikal/config
+      - ./data:/var/www/baikal/Specific

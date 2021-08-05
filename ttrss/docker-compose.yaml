@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: ttrss-net
+    name: ttrss
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -26,7 +26,7 @@ services:
     restart: always
     networks:
       - default
-      - traefik-net
+      - traefik
 
   ttrss:
     container_name: ttrss
@@ -44,7 +44,7 @@ services:
       PGID: ${PGID}
     networks:
       - default
-      - traefik-net
+      - traefik
     ports:
       - 181:80
     volumes:

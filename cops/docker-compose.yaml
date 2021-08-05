@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: cops-net
+    name: cops
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
   cops:
@@ -25,7 +25,7 @@ services:
       traefik.http.services.cops.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config:/config
       - books:/books

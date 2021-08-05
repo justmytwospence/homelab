@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: pigallery-net
+    name: pigallery
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -23,7 +23,7 @@ services:
       traefik.http.services.pigallery.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config:/app/data/config
       - ./db:/app/data/db

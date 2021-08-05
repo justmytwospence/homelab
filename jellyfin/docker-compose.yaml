@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: jellyfin-net
+    name: jellyfin
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -28,7 +28,7 @@ services:
       traefik.http.services.jellyfin.loadbalancer.server.port: 8096
     networks:
       - default
-      - traefik-net
+      - traefik
     ports:
       # - 1900:1900/udp # dlna
       # - 7359:7359/udp # dlna

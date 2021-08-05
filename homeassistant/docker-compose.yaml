@@ -1,0 +1,28 @@
+version: "3"
+
+networks:
+
+  default:
+    name: home
+
+  traefik:
+    external:
+      name: traefik
+
+services:
+
+  homeassistant:
+    container_name: homeassistant
+    image: homeassistant/home-assistant:latest
+    restart: unless-stopped
+    tty: true
+    labels:
+      traefik.enable: true
+      traefik.http.routers.homeassistant.middlewares: authelia, error-pages
+      traefik.http.services.homeassistant.loadbalancer.server.port: 8123
+    networks:
+      - default
+      - traefik
+    volumes:
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro

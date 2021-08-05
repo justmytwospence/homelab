@@ -2,20 +2,12 @@ version: "3"
 
 networks:
 
-  calibre-net:
-    external:
-      name: calibre-net
-
   default:
-    name: deluge-servarr-net
+    name: deluge-servarr
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
-
-  servarr-net:
-    external:
-      name: servarr-net
+      name: traefik
 
 services:
 
@@ -67,10 +59,8 @@ services:
       TZ: "${TZ}"
       VPNSP: mullvad
     networks:
-      - calibre-net
       - default
-      - servarr-net
-      - traefik-net
+      - traefik
     ports:
       - 58846:58846 # deluge
     volumes:

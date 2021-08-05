@@ -14,14 +14,14 @@ services:
       # GENERIC: section;parameter
       # SHARE: name;path;browse;readonly;guest;users;admins;writelist;comment
       GLOBAL1: "log level = 3"
-      GROUPID: ${GUID}
+      GROUPID: "${GUID}"
       NMBD: "true"
       SHARE1: "tv;/tv;yes;no;no"
       SHARE2: "movies;/movies;yes;no;no"
       SHARE3: "books;/books;yes;no;no"
-      TZ: ${TZ}
+      TZ: "${TZ}"
       USER: "pi;${PASSWORD}"
-      USERID: ${PUID}
+      USERID: "${PUID}"
       WORKGROUP: "WORKGROUP"
     volumes:
       - /mnt/ssd1/books:/books:z

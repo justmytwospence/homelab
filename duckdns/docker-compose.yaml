@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: duckdns-net
+    name: duckdns
 
 services:
 
@@ -13,10 +13,10 @@ services:
     restart: unless-stopped
     environment:
       LOG_FILE: "true"
-      PGID: ${PGID}
-      PUID: ${PUID}
-      SUBDOMAINS: ${SUBDOMAINS}
-      TOKEN: ${TOKEN}
-      TZ: ${TZ}
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      SUBDOMAINS: "${SUBDOMAINS}"
+      TOKEN: "${TOKEN}"
+      TZ: "${TZ}"
     volumes:
       - ./config:/config

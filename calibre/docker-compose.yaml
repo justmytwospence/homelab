@@ -3,19 +3,19 @@ version: "3"
 networks:
 
   default:
-    name: calibre-net
+    name: calibre
 
-  deluge-servarr-net:
+  deluge-servarr:
     external:
-      name: deluge-servarr-net
+      name: deluge-servarr
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
-  servarr-net:
+  servarr:
     external:
-      name: servarr-net
+      name: servarr
 
 services:
 
@@ -34,7 +34,7 @@ services:
       traefik.http.services.calibre.loadbalancer.server.port: 8080
     networks:
       - default
-      - traefik-net
+      - traefik
     ports:
       - 8081:8081 # server
       - 9090:9090 # local discovery
@@ -59,7 +59,7 @@ services:
       traefik.http.services.calibre-web.loadbalancer.server.port: 8083
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./calibre-web:/config
       - calibre:/books
@@ -84,9 +84,9 @@ services:
       traefik.http.services.readarr.loadbalancer.server.port: 8787
     networks:
       - default
-      - deluge-servarr-net
-      - servarr-net
-      - traefik-net
+      - deluge-servarr
+      - servarr
+      - traefik
     volumes:
       - ~/downloads:/downloads
       - ./readarr:/config

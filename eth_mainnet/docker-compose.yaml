@@ -2,27 +2,29 @@ version: "3"
 
 networks:
 
-  default:
-    name: eth-main-net
-
-  prometheus-net:
+  prometheus:
     external:
-      name: prometheus-net
+      name: prometheus
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
   geth:
-    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    dns: [ 192.168.1.1 ] # unbound
     image: ethereum/client-go:stable
     restart: unless-stopped
     command:
       - --cache=8192
       - --datadir=/data
-      - --identity=NodeyMcNodeFace
+      - --goerli
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.corsdomain=moz-extension://0d6948d6-4cab-4438-83f5-b74012565eb3 # MetaMask
+      - --http.port=8545 # default 8545
+      - --identity=${IDENTITY}
       - --ipcpath=/root/.ethereum/geth.ipc
       - --log.debug=true
       - --maxpeers=50
@@ -43,21 +45,22 @@ services:
         max-size: 200k
     networks:
       - default
-      - prometheus-net
+      - prometheus
     ports:
+      - 8545:8545 # rpc
       - 30303:30303 # p2p
     volumes:
       - ./geth:/root/.ethereum
       - geth:/data
 
   beacon:
-    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    dns: [ 192.168.1.1 ] # unbound
     image: prysmaticlabs/prysm-beacon-chain:stable
     restart: unless-stopped
     command:
-      - "--fallback-web3provider=https://mainnet.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}"
       - --accept-terms-of-use
       - --datadir=/data
+      - --fallback-web3provider=https://mainnet.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
       - --grpc-gateway-port=3500 # default 3500
       - --http-web3provider=/geth/geth.ipc
@@ -66,6 +69,7 @@ services:
       - --p2p-max-peers=50
       - --p2p-tcp-port=13000 # default 13000
       - --p2p-udp-port=12000 # default 12000
+      - --pyrmont
       - --rpc-host=0.0.0.0 # default 0.0.0.0
       - --rpc-port=4000 # default 4000
       - --verbosity=debug # default info
@@ -84,7 +88,7 @@ services:
         max-size: 200k
     networks:
       - default
-      - prometheus-net
+      - prometheus
     ports:
       - 12000:12000 # p2p udp
       - 13000:13000 # p2p tcp
@@ -93,7 +97,7 @@ services:
       - beacon:/data
 
   validator:
-    dns: [ 192.168.1.1 ] # bypass pihole to unbound
+    dns: [ 192.168.1.1 ] # unbound
     image: prysmaticlabs/prysm-validator:stable
     restart: unless-stopped
     command:
@@ -101,11 +105,12 @@ services:
       - --beacon-rpc-gateway-provider=beacon:3500
       - --beacon-rpc-provider=beacon:4000
       - --datadir=/data
-      - --graffiti='Hakuna Matata'
+      - --graffiti=${GRAFFITI}
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
       - --grpc-gateway-port=7500 # default 7500
       - --monitoring-host=0.0.0.0 # default 127.0.0.1
       - --monitoring-port=8081 # /metrics
+      - --pyrmont
       - --rpc-host=0.0.0.0 # default 127.0.0.1
       - --rpc-port=7000 # default 7000
       - --verbosity=debug # default info
@@ -132,8 +137,8 @@ services:
         max-size: 200k
     networks:
       - default
-      - prometheus-net
-      - traefik-net
+      - prometheus
+      - traefik
     volumes:
       - ./validator:/data
 

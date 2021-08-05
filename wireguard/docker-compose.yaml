@@ -3,15 +3,15 @@ version: "3"
 networks:
 
   default:
-    name: vpn-net
+    name: vpn
 
-  pihole-net:
+  pihole:
     external:
-      name: pihole-net
+      name: pihole
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -40,8 +40,8 @@ services:
       traefik.udp.services.wireguard.loadbalancer.server.port: 51820
     networks:
       - default
-      - pihole-net
-      - traefik-net
+      - pihole
+      - traefik
     volumes:
       - ./config:/config
       - /lib/modules:/lib/modules

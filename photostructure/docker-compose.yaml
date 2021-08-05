@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: photostructure-net
+    name: photostructure
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -27,7 +27,7 @@ services:
       traefik.http.services.photostructure.loadbalancer.server.port: 1787
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./cache:/ps/tmp
       - ./config:/ps/config

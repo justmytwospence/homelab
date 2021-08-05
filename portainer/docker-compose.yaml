@@ -2,12 +2,9 @@ version: "3"
 
 networks:
 
-  default:
-    name: portainer-net
-
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -17,10 +14,10 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: true
+      traefik.http.routers.portainer.middlewares: authelia, error-pages
       traefik.http.services.portainer.loadbalancer.server.port: 9000
     networks:
-      - default
-      - traefik-net
+      - traefik
     volumes:
       - ./data:/data
       - /var/run/docker.sock:/var/run/docker.sock

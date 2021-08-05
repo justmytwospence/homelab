@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: speedtest-net
+    name: speedtest
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -27,6 +27,6 @@ services:
       traefik.http.services.speedtest.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config:/config

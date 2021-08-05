@@ -2,32 +2,34 @@ version: "3"
 
 networks:
 
-  calibre-net:
-    external:
-      name: calibre-net
-
   default:
-    name: organizr-net
+    name: organizr
 
-  deluge-servarr-net:
+  calibre:
     external:
-      name: deluge-servarr-net
+      name: calibre
 
-  servarr-net:
+  deluge-servarr:
     external:
-      name: servarr-net
+      name: deluge-servarr
 
-  traefik-net:
+  servarr:
     external:
-      name: traefik-net
+      name: servarr
+
+  traefik:
+    external:
+      name: traefik
 
 services:
 
   organizr:
     container_name: organizr
-    image: organizr/organizr
+    image: organizr/organizr:latest
     restart: unless-stopped
     environment:
+      branch: v2-master
+      fpm: "true"
       PGID: "${PGID}"
       PUID: "${PUID}"
       TZ: "${TZ}"
@@ -36,10 +38,10 @@ services:
       traefik.http.routers.organizr.middlewares: authelia, error-pages
       traefik.http.services.organizr.loadbalancer.server.port: 80
     networks:
-      - calibre-net
+      - calibre
       - default
-      - deluge-servarr-net
-      - servarr-net
-      - traefik-net
+      - deluge-servarr
+      - servarr
+      - traefik
     volumes:
-      - ./organizr:/config
+      - ./config:/config

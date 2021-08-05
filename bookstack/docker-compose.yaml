@@ -3,11 +3,11 @@ version: "3"
 networks:
   
   default:
-    name: bookstack-net
+    name: bookstack
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -32,7 +32,7 @@ services:
       traefik.http.services.bookstack.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config:/config
 

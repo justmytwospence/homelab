@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: linkding-net
+    name: linkding
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -17,7 +17,7 @@ services:
       restart: unless-stopped
       networks:
         - default
-        - traefik-net
+        - traefik
       labels:
         traefik.enable: true
         traefik.http.routers.linkding.middlewares: authelia

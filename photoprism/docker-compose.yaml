@@ -3,15 +3,15 @@ version: "3"
 networks:
 
   default:
-    name: photoprism-net
+    name: photoprism
 
-  nextcloud-net:
+  nextcloud:
     external:
-      name: nextcloud-net
+      name: nextcloud
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -21,9 +21,9 @@ services:
     environment:
       POSTGRES_DB: photoprism
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_USER: photoprism
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      test: ["CMD", "pg_isready", "-U", photoprism]
     volumes:
       - ./db/postgres.conf:/etc/postgresql/postgresql.conf
       - ./db/pgdata:/var/lib/postgresql/data
@@ -42,7 +42,7 @@ services:
       PHOTOPRISM_DATABASE_NAME: photoprism
       PHOTOPRISM_DATABASE_PASSWORD: "${POSTGRES_PASSWORD}"
       PHOTOPRISM_DATABASE_SERVER: photoprism-db:5432
-      PHOTOPRISM_DATABASE_USER: "${POSTGRES_USER}"
+      PHOTOPRISM_DATABASE_USER: photoprism
       PHOTOPRISM_DEBUG: "true"
       PHOTOPRISM_DETECT_NSFW: "false"
       PHOTOPRISM_DISABLE_SETTINGS: "false"
@@ -70,8 +70,8 @@ services:
       traefik.http.services.photoprism.loadbalancer.server.port: 2342
     networks:
       - default
-      - nextcloud-net
-      - traefik-net
+      - nextcloud
+      - traefik
     security_opt:
       - apparmor:unconfined
       - seccomp:unconfined

@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: ghost-net
+    name: ghost
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -41,7 +41,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.ghost-blog.middlewares: error-pages
-      traefik.http.routers.ghost-blog.rule: Host(`blog.${DOMAIN}`)
+      traefik.http.routers.ghost-blog.rule: "Host(`blog.${DOMAIN}`)"
       traefik.http.services.ghost.loadbalancer.server.port: 2368
       # blog redirect
       traefik.http.middlewares.blog-redirect.redirectregex.permanent: true
@@ -54,7 +54,7 @@ services:
       traefik.http.routers.ghost-admin.rule: Host(`blog.${DOMAIN}`) && PathPrefix(`/ghost`)
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./content:/var/lib/ghost/content
 

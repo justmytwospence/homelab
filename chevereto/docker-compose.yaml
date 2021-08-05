@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: chevereto-net
+    name: chevereto
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -34,7 +34,7 @@ services:
       traefik.http.services.chevereto.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./images:/var/www/html/images
       - ./importing:/app/chevereto/importing

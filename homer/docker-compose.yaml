@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: homer-net
+    name: homer
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -16,14 +16,14 @@ services:
     image: b4bz/homer:latest
     restart: unless-stopped
     environment:
-      GID: ${PGID}
-      UID: ${PUID}
+      GID: "${PGID}"
+      UID: "${PUID}"
     labels:
       traefik.enable: true
-      traefik.http.routers.homer.middlewares: authelia
+      traefik.http.routers.homer.middlewares: authelia, error-pages
       traefik.http.services.homer.loadbalancer.server.port: 8080
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./assets:/www/assets

@@ -3,19 +3,19 @@ version: "3"
 networks:
 
   default:
-    name: lazylibrarian-net
+    name: lazylibrarian
 
-  deluge-net:
+  deluge:
     external:
-      name: deluge-net
+      name: deluge
 
-  servarr-net:
+  servarr:
     external:
-      name: servarr-net
+      name: servarr
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -34,7 +34,7 @@ services:
       traefik.http.services.lazylibrarian.loadbalancer.server.port: 5299
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config:/config
       - /mnt/ssd1/downloads:/downloads

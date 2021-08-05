@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: huginn-net
+    name: huginn
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -53,7 +53,7 @@ services:
       traefik.http.services.huginn.loadbalancer.server.port: 3000
     networks:
       - default
-      - traefik-net
+      - traefik
 
 volumes:
 

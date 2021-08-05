@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: firefly-net
+    name: firefly
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -34,7 +34,7 @@ services:
       traefik.http.services.firefly.loadbalancer.server.port: 8080
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./upload:/var/www/html/storage/upload
 
@@ -51,3 +51,19 @@ services:
     volumes:
       - ./db/postgres.conf:/etc/postgresql/postgresql.conf
       - ./db/pgdata:/var/lib/postgresql/data
+
+  ynab-importer:
+    container_name: ynab-importer
+    image: fireflyiii/ynab-importer:latest
+    restart: unless-stopped
+    environment:
+      FIREFLY_III_ACCESS_TOKEN: "${ACCESS_TOKEN}"
+      FIREFLY_III_URL: "firefly.${DOMAIN}"
+      YNAB_API_CODE: "${YNAB_API_CODE}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ynab.middlewares: authelia, error-pages
+      traefik.http.services.ynab.loadbalancer.server.port: 8080
+    networks:
+      - default
+      - traefik

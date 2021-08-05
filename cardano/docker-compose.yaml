@@ -1,0 +1,39 @@
+version: "3"
+
+networks:
+
+  default:
+    name: cardano
+
+  prometheus:
+    external:
+      name: prometheus
+
+services:
+
+  cardano:
+    container_name: cardano
+    image: cardanocommunity/cardano-node:latest
+    restart: unless-stopped
+    environment:
+      NETWORK: mainnet
+    networks:
+      - default
+      - prometheus
+    ports:
+      - 6000:6000 # p2p
+      - 12798:12798 # rpc
+    volumes:
+      - ./priv:/opt/cardano/cnode/priv
+      - ./sockets:/opt/cardano/cnode/sockets
+      - cardano:/opt/cardano/cnode/db
+
+volumes:
+
+  cardano:
+    driver: local
+    name: cardano
+    driver_opts:
+      device: :/Cardano
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

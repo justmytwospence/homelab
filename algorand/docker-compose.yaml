@@ -1,0 +1,31 @@
+version: "3"
+
+default:
+
+  default:
+    name: algorand
+
+services:
+
+  algorand:
+    container_name: algorand
+    image: algorand/stable:latest
+    restart: unless-stopped
+    entrypoint:
+      - ./goal
+      - node
+      - start
+    environment:
+      ALGORAND_DATA: /root/node/data
+    volumes:
+      - algorand:/root/node/data
+
+volumes:
+
+  algorand:
+    driver: local
+    name: algorand
+    driver_opts:
+      device: :/Algorand
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs

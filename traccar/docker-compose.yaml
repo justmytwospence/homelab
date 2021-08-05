@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: traccar-net
+    name: traccar
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -21,10 +21,11 @@ services:
       traefik.http.services.traccar.loadbalancer.server.port: 8082
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
-      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
-      - /var/log/traccar:/opt/traccar/logs:rw
+      - ./data:/opt/traccar/data
+      - ./traccar.xml:/opt/traccar/conf/traccar.xml:ro
+      - /var/log/traccar:/opt/traccar/logs
       - gpx:/gpx
 
 volumes:

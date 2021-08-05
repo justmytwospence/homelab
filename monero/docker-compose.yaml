@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: monero-net
+    name: monero
 
 services:
 

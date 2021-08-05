@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: freshrss-net
+    name: freshrss
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -39,14 +39,14 @@ services:
         --language en
         --password ${PW}
         --user ${USERNAME}
-      TZ: America/Denver
+      TZ: "${TZ}"
     labels:
       traefik.enable: true
       traefik.http.routers.freshrss.middlewares: authelia
       traefik.http.services.freshrss.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./app:/var/www/FreshRSS/data
       - ./extensions:/var/www/FreshRSS/extensions

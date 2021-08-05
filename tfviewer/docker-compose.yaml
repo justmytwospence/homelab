@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: tfviewer-net
+    name: tfviewer
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -22,6 +22,6 @@ services:
       traefik.http.services.tfviewer.loadbalancer.server.port: 8080
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./data:/data

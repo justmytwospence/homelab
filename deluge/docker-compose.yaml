@@ -3,15 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: deluge-net
+    name: deluge
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
-
-  prometheus-net:
-    external:
-      name: prometheus-net
+      name: traefik
 
 services:
 
@@ -36,10 +32,11 @@ services:
       traefik.http.services.deluge.loadbalancer.server.port: 8112
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
-      - ./deluge:/config
+      - ./config:/config
       - ./downloads:/downloads
+      - ./torrents:/torrents
       - distros:/downloads/distros
 
 volumes:

@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: unmanic-net
+    name: unmanic
 
 services:
 

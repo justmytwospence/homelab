@@ -7,11 +7,11 @@ version: "3"
 networks:
 
   default:
-    name: photonix-net
+    name: photonix
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -51,7 +51,7 @@ services:
       traefik.http.services.photonix.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./cache:/data/cache
       - ./models:/data/models
@@ -65,8 +65,13 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+    volumes:
+      - redis:/data
 
 volumes:
+
+  redis:
+    name: photonix-redis
 
   photos:
     external:

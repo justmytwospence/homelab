@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: servarr-net
+    name: servarr
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -26,7 +26,7 @@ services:
       traefik.http.services.bazarr.loadbalancer.server.port: 6767
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./bazarr:/config
       - multimedia:/multimedia
@@ -47,7 +47,7 @@ services:
       traefik.http.services.jackett.loadbalancer.server.port: 9117
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./jackett:/config
 
@@ -65,7 +65,7 @@ services:
       traefik.http.services.prowlarr.loadbalancer.server.port: 9696
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./prowlarr:/config
 
@@ -89,7 +89,7 @@ services:
       traefik.http.services.radarr.loadbalancer.server.port: 7878
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./radarr:/config
       - multimedia:/multimedia
@@ -115,7 +115,7 @@ services:
       traefik.http.services.sonarr.loadbalancer.server.port: 8989
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./sonarr:/config
       - multimedia:/multimedia

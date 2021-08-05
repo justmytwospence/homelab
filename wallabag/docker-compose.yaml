@@ -3,11 +3,11 @@ version: '3'
 networks:
 
   default:
-    name: wallabag-net
+    name: wallabag
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -29,6 +29,8 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+    volumes:
+      - redis:/data
 
   wallabag:
     container_name: wallabag
@@ -59,6 +61,11 @@ services:
       traefik.http.services.wallabag.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./images:/var/www/wallabag/web/assets/images
+
+volumes:
+
+  redis:
+    name: wallabag-redis

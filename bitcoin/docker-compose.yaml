@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: bitcoin-net
+    name: bitcoin
 
-  prometheus-net:
+  prometheus:
     external:
-      name: prometheus-net
+      name: prometheus
 
 services:
 
@@ -18,8 +18,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
-          memory: 4G # 2G recommended
+          cpus: 4
+          memory: 8G # 2G recommended
     logging:
       driver: json-file
       options:
@@ -56,12 +56,25 @@ services:
       ELECTRS_VERBOSE: 4
     networks:
       - default
-      - prometheus-net
+      - prometheus
     ports:
       - 51001:51001
     volumes:
       - ./shared:/shared
       - electrs:/db
+
+  # lightningd:
+  #   container_name: lightningd
+  #   image: elementsproject/lightningd:latest
+  #   restart: unless-stopped
+  #   command:
+  #     - --daemon
+  #     - --lightning-dir=/lightning
+  #     - --log-file=/lightning/lightningd.log
+  #     - --log-level=debug
+  #     - --network=bitcoin
+  #   volumes:
+  #     - ./lightning:/lightning
 
 volumes:
 

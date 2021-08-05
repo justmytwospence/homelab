@@ -3,14 +3,14 @@ version: "3"
 networks:
 
   default:
-    name: pihole-net
+    name: pihole
     ipam:
       config:
         - subnet: 172.16.0.0/16
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -48,7 +48,7 @@ services:
     networks:
       default:
         ipv4_address: 172.16.0.100
-      traefik-net:
+      traefik:
     ports:
       - "${ServerIP}:53:53/tcp"
       - "${ServerIP}:53:53/udp"

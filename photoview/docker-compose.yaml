@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: photoview-net
+    name: photoview
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -46,7 +46,7 @@ services:
       traefik.http.services.photoview.loadbalancer.server.port: 80
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./cache:/app/cache # thumbnails etc
       - photos:/photos:ro # in-place photos

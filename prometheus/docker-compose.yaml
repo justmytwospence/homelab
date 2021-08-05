@@ -3,15 +3,15 @@ version: "3"
 networks:
 
   default:
-    name: prometheus-net
+    name: prometheus
 
-  grafana-net:
+  grafana:
     external:
-      name: grafana-net
+      name: grafana
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -39,7 +39,7 @@ services:
       traefik.http.services.cadvisor.loadbalancer.server.port: 8080
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - /:/rootfs:ro
       - /dev/disk:/dev/disk:ro
@@ -66,7 +66,7 @@ services:
       - --config.file=/ping-exporter.yaml
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       - ./config/ping-exporter.yaml:/ping-exporter.yaml
 
@@ -89,8 +89,8 @@ services:
       traefik.http.services.prometheus.loadbalancer.server.port: 9090
     networks:
       - default
-      - grafana-net
-      - traefik-net
+      - grafana
+      - traefik
     volumes:
       - ./config:/etc/prometheus/
       - ./data:/prometheus

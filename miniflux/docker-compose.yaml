@@ -3,15 +3,15 @@ version: "3"
 networks:
 
   default:
-    name: miniflux-net
+    name: miniflux
 
-  prometheus-net:
+  prometheus:
     external:
-      name: prometheus-net
+      name: prometheus
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -65,5 +65,5 @@ services:
         max-size: 10M
     networks:
       - default
-      - prometheus-net
-      - traefik-net
+      - prometheus
+      - traefik

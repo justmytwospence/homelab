@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: syncthing-net
+    name: syncthing
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -28,7 +28,7 @@ services:
       traefik.http.services.syncthing.loadbalancer.server.port: 8384
     networks:
       - default
-      - traefik-net
+      - traefik
     ports:
       - 8384:8384
       - 22000:22000/tcp

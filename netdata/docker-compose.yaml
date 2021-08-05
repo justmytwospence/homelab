@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: netdata-net
+    name: netdata
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -34,7 +34,7 @@ services:
       traefik.http.services.netdata.loadbalancer.server.port: 19999
     networks:
       - default
-      - traefik-net
+      - traefik
     security_opt:
       - apparmor:unconfined
     volumes:

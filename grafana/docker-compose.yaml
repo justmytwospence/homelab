@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: grafana-net
+    name: grafana
 
-  traefik-net:
+  traefik:
     external:
-      name: traefik-net
+      name: traefik
 
 services:
 
@@ -27,7 +27,7 @@ services:
       traefik.http.services.grafana.loadbalancer.server.port: 3000
     networks:
       - default
-      - traefik-net
+      - traefik
     volumes:
       # these directories need to be owned by user 472
       - ./data:/var/lib/grafana
