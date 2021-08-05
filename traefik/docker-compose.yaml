@@ -3,11 +3,11 @@ version: "3"
 networks:
 
   default:
-    name: traefik-net
+    name: traefik
 
-  prometheus-net:
+  prometheus:
     external:
-      name: prometheus-net
+      name: prometheus
 
 services:
 
@@ -19,9 +19,36 @@ services:
       redis:
         condition: service_healthy
     environment:
+      AUTHELIA_AUTHENTICATION_BACKEND_FILE_PATH: /config/users_database.yml
+      AUTHELIA_DEFAULT_REDIRECTION_URL: "https://heimdall.${DOMAIN}"
       AUTHELIA_JWT_SECRET_FILE: /config/secrets/jwt
+      AUTHELIA_LOG_FILE_PATH: /config/log/authelia.log
+      AUTHELIA_LOG_KEEP_STDOUT: "true"
+      AUTHELIA_LOG_LEVEL: debug
+      AUTHELIA_NOTIFIER_DISABLE_STARTUP_CHECK: "false"
+      AUTHELIA_NOTIFIER_SMTP_DISABLE_HTML_EMAILS: "true"
+      AUTHELIA_NOTIFIER_SMTP_HOST: "smtp.${SMTP_HOST}"
       AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE: /config/secrets/smtp
+      AUTHELIA_NOTIFIER_SMTP_PORT: 587
+      AUTHELIA_NOTIFIER_SMTP_SENDER: "authelia@${DOMAIN}"
+      AUTHELIA_NOTIFIER_SMTP_USERNAME: "${EMAIL}"
+      AUTHELIA_REGULATION_BAN_TIME: 300
+      AUTHELIA_REGULATION_FIND_TIME: 120
+      AUTHELIA_REGULATION_MAX_RETRIES: 3
+      AUTHELIA_SERVER_HOST: 0.0.0.0
+      AUTHELIA_SERVER_PORT: 9091
+      AUTHELIA_SERVER_READ_BUFFER_SIZE: 8192
+      AUTHELIA_SERVER_WRITE_BUFFER_SIZE: 8192
+      AUTHELIA_SESSION_DOMAIN: "${DOMAIN}"
+      AUTHELIA_SESSION_EXPIRATION: 3600 # 1 hour
+      AUTHELIA_SESSION_INACTIVITY: 300 # 5 minutes
+      AUTHELIA_SESSION_NAME: authelia_session
+      AUTHELIA_SESSION_REDIS_HOST: authelia-redis
+      AUTHELIA_SESSION_REDIS_PORT: 6379
       AUTHELIA_SESSION_SECRET_FILE: /config/secrets/session
+      AUTHELIA_STORAGE_LOCAL_PATH: /config/db.sqlite3
+      AUTHELIA_THEME: grey
+      AUTHELIA_TOTP_ISSUER: authelia.com
       PGID: "${PGID}"
       PUID: "${PUID}"
       TZ: "${TZ}"
@@ -79,7 +106,7 @@ services:
       traefik.http.services.jaeger.loadbalancer.server.port: 16686
     networks:
       - default
-      - prometheus-net
+      - prometheus
     volumes:
       - jaeger-tmp:/tmp
 
@@ -148,7 +175,7 @@ services:
       TRAEFIK_PROVIDERS_DOCKER_DEFAULTRULE: Host(`{{ index .Labels "com.docker.compose.service" }}.${DOMAIN}`)
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: tcp://traefik-docker-proxy:2375
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
-      TRAEFIK_PROVIDERS_DOCKER_NETWORK: traefik-net
+      TRAEFIK_PROVIDERS_DOCKER_NETWORK: traefik
       TRAEFIK_PROVIDERS_DOCKER_WATCH: "true"
       # file provider
       DOMAIN: "${DOMAIN}"
@@ -176,7 +203,7 @@ services:
       traefik.http.routers.ping.service: ping@internal
     networks:
       - default
-      - prometheus-net
+      - prometheus
     ports:
       - 80:80
       - 443:443
