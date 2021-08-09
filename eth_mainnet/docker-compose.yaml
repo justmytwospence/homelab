@@ -19,7 +19,6 @@ services:
     command:
       - --cache=8192
       - --datadir=/data
-      - --goerli
       - --http
       - --http.addr=0.0.0.0
       - --http.corsdomain=moz-extension://0d6948d6-4cab-4438-83f5-b74012565eb3 # MetaMask
@@ -69,13 +68,9 @@ services:
       - --p2p-max-peers=50
       - --p2p-tcp-port=13000 # default 13000
       - --p2p-udp-port=12000 # default 12000
-      - --pyrmont
       - --rpc-host=0.0.0.0 # default 0.0.0.0
       - --rpc-port=4000 # default 4000
       - --verbosity=debug # default info
-    depends_on:
-      geth:
-        condition: service_started
     deploy:
       resources:
         limits:
@@ -110,7 +105,6 @@ services:
       - --grpc-gateway-port=7500 # default 7500
       - --monitoring-host=0.0.0.0 # default 127.0.0.1
       - --monitoring-port=8081 # /metrics
-      - --pyrmont
       - --rpc-host=0.0.0.0 # default 127.0.0.1
       - --rpc-port=7000 # default 7000
       - --verbosity=debug # default info

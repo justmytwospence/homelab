@@ -60,7 +60,7 @@ services:
     command:
       - --accept-terms-of-use
       - --datadir=/data
-      - --fallback-web3provider=https://mainnet.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}
+      - --fallback-web3provider=https://goerli.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
       - --grpc-gateway-port=3500 # default 3500
       - --http-web3provider=/geth/geth.ipc
@@ -73,9 +73,6 @@ services:
       - --rpc-host=0.0.0.0 # default 0.0.0.0
       - --rpc-port=4000 # default 4000
       - --verbosity=debug # default info
-    depends_on:
-      geth:
-        condition: service_started
     deploy:
       resources:
         limits:
@@ -127,9 +124,9 @@ services:
           memory: 16G # 16G recommended for Prysm
     labels:
       traefik.enable: true
-      traefik.http.routers.prysm-mainnet.middlewares: authelia, error-pages, whitelist-lan@file
-      traefik.http.routers.prysm-mainnet.rule: "Host(`prysm-mainnet.${DOMAIN}`)"
-      traefik.http.services.prysm-mainnet.loadbalancer.server.port: 7500
+      traefik.http.routers.prysm-testnet.middlewares: authelia, error-pages, whitelist-lan@file
+      traefik.http.routers.prysm-testnet.rule: "Host(`prysm-testnet.${DOMAIN}`)"
+      traefik.http.services.prysm-testnet.loadbalancer.server.port: 7500
     logging:
       driver: json-file
       options:
