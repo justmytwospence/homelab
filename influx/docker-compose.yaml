@@ -15,25 +15,22 @@ networks:
 
 services:
 
-  chronograf:
-    container_name: chronograf
-    image: chronograf:1.8
-    restart: unless-stopped
-    depends_on:
-      influxdb:
-        condition: service_started
-    environment:
-      INFLUXDB_URL: http://influxdb:8086
-      KAPACITOR_URL: http://kapacitor:9092
-    labels:
-      traefik.enable: true
-      traefik.http.routers.chronograf.middlewares: authelia, error-pages
-      traefik.http.services.chronograf.loadbalancer.server.port: 8888
-    networks:
-      - default
-      - traefik
-    volumes:
-      - chronograf:/var/lib/chronograf
+  # chronograf:
+  #   container_name: chronograf
+  #   image: chronograf:1.8
+  #   restart: unless-stopped
+  #   environment:
+  #     INFLUXDB_URL: http://influxdb:8086
+  #     KAPACITOR_URL: http://kapacitor:9092
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.chronograf.middlewares: authelia, error-pages
+  #     traefik.http.services.chronograf.loadbalancer.server.port: 8888
+  #   networks:
+  #     - default
+  #     - traefik
+  #   volumes:
+  #     - chronograf:/var/lib/chronograf
 
   docker-proxy:
     container_name: telegraf-docker-proxy
@@ -75,34 +72,29 @@ services:
       - influxdb-etc:/etc/influxdb2
       - influxdb-lib:/var/lib/influxdb2
 
-  kapacitor:
-    container_name: kapacitor
-    image: kapacitor:1.5
-    restart: unless-stopped
-    environment:
-      KAPACITOR_HOSTNAME: kapacitor
-      KAPACITOR_INFLUXDB_0_DISABLE_SUBSCRIPTIONS: "true"
-      KAPACITOR_INFLUXDB_0_PASSWORD: "${INFLUX_TOKEN}"
-      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
-      KAPACITOR_INFLUXDB_0_USERNAME: "${INFLUX_USERNAME}"
-      KAPACITOR_LOGGING_LEVEL: INFO
-      KAPACITOR_REPORTING_ENABLED: "false"
-    networks:
-      - default
-      - traefik
-    volumes:
-      - kapacitor:/var/lib/kapacitor
+  # kapacitor:
+  #   container_name: kapacitor
+  #   image: kapacitor:1.5
+  #   restart: unless-stopped
+  #   environment:
+  #     KAPACITOR_HOSTNAME: kapacitor
+  #     KAPACITOR_INFLUXDB_0_DISABLE_SUBSCRIPTIONS: "true"
+  #     KAPACITOR_INFLUXDB_0_PASSWORD: "${INFLUX_TOKEN}"
+  #     KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+  #     KAPACITOR_INFLUXDB_0_USERNAME: "${INFLUX_USERNAME}"
+  #     KAPACITOR_LOGGING_LEVEL: INFO
+  #     KAPACITOR_REPORTING_ENABLED: "false"
+  #   networks:
+  #     - default
+  #     - traefik
+  #   volumes:
+  #     - kapacitor:/var/lib/kapacitor
 
   telegraf:
     container_name: telegraf
     image: telegraf:1.18
     network_mode: host
     restart: unless-stopped
-    depends_on:
-      docker-proxy:
-        condition: service_started
-      influxdb:
-        condition: service_started
     environment:
       HOST_ETC: /hostfs/etc
       HOST_MOUNT_PREFIX: /hostfs
