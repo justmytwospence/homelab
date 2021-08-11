@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: home
+    name: hass
 
   traefik:
     external:
@@ -11,15 +11,18 @@ networks:
 
 services:
 
-  homeassistant:
-    container_name: homeassistant
+  hass:
+    container_name: hass
     image: homeassistant/home-assistant:latest
     restart: unless-stopped
-    tty: true
+    environment:
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
     labels:
       traefik.enable: true
-      traefik.http.routers.homeassistant.middlewares: authelia, error-pages
-      traefik.http.services.homeassistant.loadbalancer.server.port: 8123
+      # traefik.http.middlewares.allow-embedding.headers.contentSecurityPolicy: "frame-ancestors organizr.${DOMAIN}"
+      traefik.http.services.hass.loadbalancer.server.port: 8123
     networks:
       - default
       - traefik

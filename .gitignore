@@ -22,6 +22,9 @@
 !grafana/provisioning/
 !grafana/provisioning/**
 
+!homeassistant/config/
+!homeassistant/config/configuration.yaml
+
 !homer/assets/config.yaml
 
 !monero/bitmonero.conf
