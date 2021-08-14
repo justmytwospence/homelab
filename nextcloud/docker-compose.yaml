@@ -52,7 +52,7 @@ services:
       NEXTCLOUD_ADMIN_PASSWORD: "${NEXTCLOUD_ADMIN_PASSWORD}"
       NEXTCLOUD_ADMIN_USER: "${NEXTCLOUD_ADMIN_USER}"
       NEXTCLOUD_DATA_DIR: /data
-      NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.${DOMAIN}
+      NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.${DOMAIN}, nextcloud
       OVERWRITEPROTOCOL: https
       PHP_MEMORY_LIMIT: 4G
       PHP_UPLOAD_LIMIT: 4G
@@ -65,7 +65,7 @@ services:
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_NAME: "${SMTP_NAME}"
       SMTP_PASSWORD: "${SMTP_PASSWORD}"
-      SMTP_SECURE: STARTTLS
+      SMTP_SECURE: ssl
     labels:
       traefik.enable: true
       traefik.http.middlewares.dav.redirectregex.permanent: true
@@ -79,7 +79,6 @@ services:
       - ./data:/data
       - ./nextcloud:/var/www/html
       - documents:/documents
-      - photos:/photos
 
   redis:
     command: redis-server --requirepass "${REDIS_HOST_PASSWORD}"
@@ -98,14 +97,6 @@ volumes:
     name: documents
     driver_opts:
       device: :/Documents
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
-
-  photos:
-    driver: local
-    name: photos
-    driver_opts:
-      device: :/Photos
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
 
