@@ -11,10 +11,27 @@ networks:
 
 services:
 
+  db:
+    container_name: traccar-db
+    image: postgres:13.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: traccar
+      POSTGRES_PASSWORD: "${PASSWORD}"
+      POSTGRES_USER: traccar
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "traccar"]
+    volumes:
+      - ./db/postgres.conf:/etc/postgresql/postgresql.conf
+      - ./db/pgdata:/var/lib/postgresql/data
+
   traccar:
     container_name: traccar
     image: traccar/traccar:latest
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     labels:
       traefik.enable: true
       traefik.http.routers.traccar.middlewares: error-pages
@@ -26,10 +43,3 @@ services:
       - ./data:/opt/traccar/data
       - ./traccar.xml:/opt/traccar/conf/traccar.xml:ro
       - /var/log/traccar:/opt/traccar/logs
-      - gpx:/gpx
-
-volumes:
-
-  gpx:
-    external:
-      name: gpx
