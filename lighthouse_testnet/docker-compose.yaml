@@ -1,0 +1,52 @@
+version: "3"
+
+networks:
+
+  default:
+    name: lighthouse_testnet
+
+  geth_testnet:
+    external:
+      name: geth_testnet
+
+  prometheus:
+    external:
+      name: prometheus
+
+services:
+
+  lighthouse:
+    container_name: lighthouse_testnet
+    dns: [ 192.168.1.1 ] # unbound
+    image: sigp/lighthouse:latest
+    command:
+      - lighthouse
+      - beacon_node
+      - --datadir=/data
+      - --eth1-endpoints=http://geth_testnet:8546, ${INFURA_URL}
+      - --graffiti=${GRAFFITI}
+      - --http
+      - --http-address=0.0.0.0 # default localhost
+      - --metrics # prometheus
+      - --metrics-address=0.0.0.0 # default localhost
+      - --network=pyrmont
+      - --port=9000 # default 9000
+    networks:
+      - default
+      - geth_testnet
+      - prometheus
+    ports:
+      - 9000:9000
+    volumes:
+      - lighthouse:/data
+      - geth:/geth
+
+volumes:
+
+  geth:
+    external: true
+    name: geth_testnet
+
+  lighthouse:
+    name: lighthouse_testnet
+

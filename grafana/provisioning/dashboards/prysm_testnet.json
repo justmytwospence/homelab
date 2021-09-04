@@ -3930,7 +3930,7 @@
     ]
   },
   "timezone": "",
-  "title": "ETH staking dashboard",
-  "uid": "prysm",
+  "title": "Prysm Testnet",
+  "uid": "prysm_testnet",
   "version": 116
 }

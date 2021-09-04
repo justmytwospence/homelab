@@ -1,0 +1,53 @@
+version: "3"
+
+networks:
+
+  default:
+    name: teku_testnet
+
+  geth_testnet:
+    external:
+      name: geth_testnet
+
+  prometheus:
+    external:
+      name: prometheus
+
+services:
+
+  teku:
+    container_name: teku_testnet
+    dns: [ 192.168.1.1 ]
+    image: consensys/teku:latest
+    command:
+      - --data-base-path=/opt/teku/data
+      - --data-beacon-path=/beaconchain
+      - --eth1-endpoints=http://geth_testnet:8546, ${INFURA_URL}
+      - --logging=DEBUG
+      - --metrics-enabled=true
+      - --metrics-host-allowlist=teku_testnet
+      - --metrics-interface=0.0.0.0
+      - --network=pyrmont
+      - --p2p-port=9001
+      - --rest-api-docs-enabled=true
+      - --rest-api-enabled=true
+      - --validator-keys=/opt/teku/data/validator/keys/${KEYNAME}.json:/opt/teku/data/validator/passwords/${KEYNAME}.txt
+    environment:
+      - JAVA_OPTS=-Xmx4g
+    networks:
+      - default
+      - geth_testnet
+      - prometheus
+    ports:
+      - 9001:9001
+      - 5051:5051
+    volumes:
+      - ./beaconchain:/beaconchain
+      - ./teku:/opt/teku/data
+      - geth:/geth
+
+volumes:
+
+  geth:
+    external: true
+    name: geth_testnet
