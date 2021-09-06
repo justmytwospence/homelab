@@ -1,6 +1,11 @@
 http:
   routers:
 
+    homeassistant:
+      rule: Host(`hass.{{ env "DOMAIN" }}`)
+      middlewares: error-pages@docker
+      service: homeassistant
+
     netdata:
       rule: Host(`netdata.{{ env "DOMAIN" }}`)
       middlewares: authelia@docker, error-pages@docker
@@ -12,11 +17,16 @@ http:
 
   services:
 
+    homeassistant:
+      loadBalancer:
+        servers:
+          - url: http://homeassistant.lan:8123
+
     netdata:
       loadBalancer:
         servers:
-          - url: http://{{ env "OPNSENSE_IP" }}:19999
+          - url: http://opnsense.lan:19999
     plex:
       loadBalancer:
         servers:
-          - url: http://{{ env "QNAP_IP" }}:32400
+          - url: http://qnap.lan:32400

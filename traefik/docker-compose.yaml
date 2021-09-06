@@ -137,7 +137,7 @@ services:
     environment:
       # internal endpoints
       TRAEFIK_API: "true"
-      TRAEFIK_API_DEBUG: "false"
+      TRAEFIK_API_DEBUG: "true"
       TRAEFIK_API_INSECURE: "true"
       TRAEFIK_PING: "true"
       # metrics
@@ -147,7 +147,7 @@ services:
       TRAEFIK_METRICS_PROMETHEUS_ENTRYPOINT: metrics
       # logging
       TRAEFIK_ACCESSLOG_FILEPATH: /var/log/access.log
-      TRAEFIK_LOG_LEVEL: INFO
+      TRAEFIK_LOG_LEVEL: DEBUG
       # tracing
       TRAEFIK_TRACING_JAEGER: "true"
       TRAEFIK_TRACING_JAEGER_COLLECTOR_ENDPOINT: http://jaeger:14268/api/traces?format=jaeger.thrift
