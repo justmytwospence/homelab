@@ -1,0 +1,34 @@
+version: "3"
+
+networks:
+
+  default:
+    name: nimbus_testnet
+
+services:
+
+  nimbus:
+    container_name: nimbus_testnet
+    image: statusim/nimbus-eth2:amd64-latest
+    restart: unless-stopped
+    stop_grace_period: 1m
+    command: >-
+      --data-dir=/data
+      --log-level=debug
+      --nat=extip:YOUR_EXTERNAL_IP
+      --network=pyrmont
+      --rpc
+      --rpc-address=0.0.0.0
+      --rpc-port=9190
+      --tcp-port=9004
+      --udp-port=9004
+      --web3-url={INFURA_URL}
+      --web3-url=wss://geth_testnet:8546
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+      - 127.0.0.1:9190:9190/tcp
+    volumes:
+      - ./data:/data
+
+
