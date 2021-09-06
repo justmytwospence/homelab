@@ -22,7 +22,7 @@ services:
       - --http.addr=0.0.0.0
       - --http.corsdomain=moz-extension://0d6948d6-4cab-4438-83f5-b74012565eb3 # MetaMask
       - --http.port=8545 # default 8545
-      - --http.vhosts=*
+      - --http.vhosts=geth_mainnet
       - --identity=${IDENTITY}
       - --ipcpath=/root/.ethereum/geth.ipc
       - --log.debug=true
@@ -35,7 +35,7 @@ services:
       resources:
         limits:
           cpus: 4
-          memory: 16G # 16G+ recommended
+          memory: 16G
     logging:
       driver: json-file
       options:
@@ -45,6 +45,7 @@ services:
       - default
       - prometheus
     ports:
+      - 8545:8545 # rcp
       - 30303:30303 # p2p
     volumes:
       - geth:/root/.ethereum

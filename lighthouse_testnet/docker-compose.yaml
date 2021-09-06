@@ -26,27 +26,38 @@ services:
       - --eth1-endpoints=http://geth_testnet:8546, ${INFURA_URL}
       - --graffiti=${GRAFFITI}
       - --http
-      - --http-address=0.0.0.0 # default localhost
+      - --http-address=0.0.0.0
       - --metrics # prometheus
-      - --metrics-address=0.0.0.0 # default localhost
+      - --metrics-address=0.0.0.0
       - --network=pyrmont
-      - --port=9000 # default 9000
+      - --port=9002 # default 9000
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 16G
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 200k
     networks:
       - default
       - geth_testnet
       - prometheus
     ports:
-      - 9000:9000
+      - 9002:9002
     volumes:
       - lighthouse:/data
-      - geth:/geth
 
 volumes:
 
-  geth:
-    external: true
-    name: geth_testnet
+  beaconchain:
+    driver: local
+    driver_opts:
+      device: :/Lighthouse_Pyrmont
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
 
   lighthouse:
     name: lighthouse_testnet
-

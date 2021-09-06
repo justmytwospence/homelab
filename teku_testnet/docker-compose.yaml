@@ -19,35 +19,46 @@ services:
     container_name: teku_testnet
     dns: [ 192.168.1.1 ]
     image: consensys/teku:latest
-    command:
-      - --data-base-path=/opt/teku/data
-      - --data-beacon-path=/beaconchain
-      - --eth1-endpoints=http://geth_testnet:8546, ${INFURA_URL}
-      - --logging=DEBUG
-      - --metrics-enabled=true
-      - --metrics-host-allowlist=teku_testnet
-      - --metrics-interface=0.0.0.0
-      - --network=pyrmont
-      - --p2p-port=9001
-      - --rest-api-docs-enabled=true
-      - --rest-api-enabled=true
-      - --validator-keys=/opt/teku/data/validator/keys/${KEYNAME}.json:/opt/teku/data/validator/passwords/${KEYNAME}.txt
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 16G
     environment:
-      - JAVA_OPTS=-Xmx4g
+      JAVA_OPTS: -Xmx4g
+      TEKU_DATA_BEACON_PATH: /beaconchain
+      TEKU_ETH1_ENDPOINTS: http://geth_testnet:8546, ${INFURA_URL}
+      TEKU_LOGGING: INFO
+      TEKU_METRICS_ENABLED: "true"
+      TEKU_METRICS_HOST_ALLOWLIST: teku_testnet
+      TEKU_METRICS_INTERFACE: 0.0.0.0
+      TEKU_NETWORK: pyrmont
+      TEKU_P2P_PORT: 9001
+      TEKU_REST_API_DOCS_ENABLED: "true"
+      TEKU_REST_API_ENABLED: "true"
+      TEKU_VALIDATOR_KEYS: /validator/keys:/validator/passwords/
+      TEKU_VALIDATORS_GRAFFITI: "${GRAFFITI}"
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 200k
     networks:
       - default
       - geth_testnet
       - prometheus
     ports:
-      - 9001:9001
+      - 9001:9001 # p2p
       - 5051:5051
     volumes:
-      - ./beaconchain:/beaconchain
-      - ./teku:/opt/teku/data
-      - geth:/geth
+      - ./validator:/validator
+      - beaconchain:/beaconchain
 
 volumes:
 
-  geth:
-    external: true
-    name: geth_testnet
+  beaconchain:
+    driver: local
+    driver_opts:
+      device: :/Teku_Pyrmont
+      o: addr=192.168.1.3,nfsvers=4,rw
+      type: nfs
