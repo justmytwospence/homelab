@@ -9,39 +9,27 @@ scrape_configs:
     static_configs:
       - targets: ["cadvisor:8080"]
 
-  - job_name: eth-mainnet-beacon
-    static_configs:
-      - targets: ["eth_mainnet_beacon_1:8080"]
-
-  - job_name: eth-mainnet-geth
+  - job_name: geth_mainnet
     metrics_path: /debug/metrics/prometheus
     static_configs:
-      - targets: ["eth_mainnet_geth_1:6060"]
+      - targets: ["geth_mainnet:6060"]
 
-  - job_name: eth-mainnet-validator
-    static_configs:
-      - targets: ["eth_mainnet_validator_1:8081"]
-
-  - job_name: eth-testnet-beacon
-    static_configs:
-      - targets: ["eth_testnet_beacon_1:8080"]
-
-  - job_name: eth-testnet-geth
+  - job_name: geth_testnet
     metrics_path: /debug/metrics/prometheus
     static_configs:
-      - targets: ["eth_testnet_geth_1:6060"]
-
-  - job_name: eth-testnet-validator
-    static_configs:
-      - targets: ["eth_testnet_validator_1:8081"]
+      - targets: ["geth_testnet:6060"]
 
   - job_name: jaeger
     static_configs:
       - targets: ["jaeger:14269"]
 
   - job_name: jupyter
-    static_configs:
+    static_configs: 
       - targets: ["jupyter:8888"]
+
+  - job_name: lighthoust_testnet
+    static_configs:
+      - targets: ["lighthouse_testnet:5054"]
 
   - job_name: miniflux
     scrape_interval: 10m
@@ -77,6 +65,22 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
+  # - job_name: prysm_mainnet_beacon
+  #   static_configs:
+  #     - targets: ["prysm_mainnet_beacon_1:8080"]
+
+  # - job_name: prysm_mainnet_validator
+  #   static_configs:
+  #     - targets: ["prysm_mainnet_validator_1:8081"]
+
+  - job_name: prysm_testnet_beacon
+    static_configs:
+      - targets: ["prysm_testnet_beacon_1:8080"]
+
+  - job_name: prysm_testnet_validator
+    static_configs:
+      - targets: ["prysm_testnet_validator_1:8081"]
+
   - job_name: speedtest
     scrape_interval: 30m
     scrape_timeout: 1m
@@ -84,6 +88,10 @@ scrape_configs:
       - targets: ["speedtest-exporter:9798"]
     tls_config:
       insecure_skip_verify: true
+
+  - job_name: teku_testnet
+    static_configs:
+      - targets: ["teku_testnet:8008"]
 
   - job_name: traefik
     static_configs:
