@@ -22,7 +22,7 @@ services:
     command:
       - --accept-terms-of-use
       - --datadir=/data
-      # - --fallback-web3provider=https://mainnet.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}
+      - --fallback-web3provider=${INFURA_URL}
       - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
       - --grpc-gateway-port=3500 # default 3500
       - --http-web3provider=/geth/geth.ipc
@@ -63,13 +63,13 @@ services:
       - --beacon-rpc-provider=beacon:4000
       - --datadir=/data
       - --graffiti=${GRAFFITI}
-      - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
+      - --grpc-gateway-host=0.0.0.0
       - --grpc-gateway-port=7500 # default 7500
-      - --monitoring-host=0.0.0.0 # default 127.0.0.1
+      - --monitoring-host=0.0.0.0
       - --monitoring-port=8081 # /metrics
-      - --rpc-host=0.0.0.0 # default 127.0.0.1
+      - --rpc-host=0.0.0.0
       - --rpc-port=7000 # default 7000
-      - --verbosity=debug # default info
+      - --verbosity=debug # info,debug,trace; default info
       - --wallet-dir=/data/wallet
       - --web
       - --write-wallet-password-on-web-onboarding
@@ -112,7 +112,3 @@ volumes:
   geth:
     external: true
     name: geth_mainnet
-
-  powchain:
-    external: true
-    name: geth_mainnet_powchain

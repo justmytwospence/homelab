@@ -20,11 +20,11 @@ services:
     image: prysmaticlabs/prysm-beacon-chain:latest
     restart: unless-stopped
     command:
+      # - --force-clear-db
       - --accept-terms-of-use
       - --datadir=/data
-      # - --fallback-web3provider=https://goerli.infura.io/v3/${INFURA_PROJECT},Basic ${INFURA_SECRET}
-      - --force-clear-db
-      - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
+      - --fallback-web3provider=${INFURA_URL}
+      - --grpc-gateway-host=0.0.0.0
       - --grpc-gateway-port=3500 # default 3500
       - --http-web3provider=/geth/geth.ipc
       - --monitoring-host=0.0.0.0
@@ -32,14 +32,14 @@ services:
       - --p2p-tcp-port=13001 # default 13000
       - --p2p-udp-port=12001 # default 12000
       - --pyrmont # testnet
-      - --rpc-host=0.0.0.0 # default 0.0.0.0
+      - --rpc-host=0.0.0.0
       - --rpc-port=4000 # default 4000
-      - --verbosity=trace # info,debug,trace; default info
+      - --verbosity=debug # info,debug,trace; default info
     deploy:
       resources:
         limits:
           cpus: 4
-          memory: 16G # 16G recommended for Prysm
+          memory: 16G
     logging:
       driver: json-file
       options:
@@ -65,12 +65,12 @@ services:
       - --beacon-rpc-provider=beacon:4000
       - --datadir=/data
       - --graffiti=${GRAFFITI}
-      - --grpc-gateway-host=0.0.0.0 # default 127.0.0.1
+      - --grpc-gateway-host=0.0.0.0
       - --grpc-gateway-port=7500 # default 7500
-      - --monitoring-host=0.0.0.0 # default 127.0.0.1
+      - --monitoring-host=0.0.0.0
       - --monitoring-port=8081 # /metrics
       - --pyrmont # testnet
-      - --rpc-host=0.0.0.0 # default 127.0.0.1
+      - --rpc-host=0.0.0.0
       - --rpc-port=7000 # default 7000
       - --verbosity=debug # default info
       - --wallet-dir=/data/wallet
@@ -108,14 +108,10 @@ volumes:
   beaconchain:
     driver: local
     driver_opts:
-      device: :/Beacon_Pyrmont
+      device: :/Prysm_Pyrmont
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
 
   geth:
     external: true
     name: geth_testnet
-
-  powchain:
-    external: true
-    name: geth_testnet_powchain
