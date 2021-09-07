@@ -28,7 +28,7 @@ services:
       TZ: "${TZ}"
     labels:
       traefik.enable: true
-      traefik.http.routers.deluge-servarr.rule: "Host(`deluge-servarr.${DOMAIN}`)"
+      traefik.http.routers.deluge-servarr.rule: "Host(`servarr.${DOMAIN}`)"
       traefik.http.routers.deluge-servarr.middlewares: error-pages
       traefik.http.services.deluge-servarr.loadbalancer.server.port: 8112
     volumes:
