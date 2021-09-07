@@ -23,13 +23,13 @@ scrape_configs:
     static_configs:
       - targets: ["jaeger:14269"]
 
-  - job_name: jupyter
-    static_configs: 
-      - targets: ["jupyter:8888"]
+  # - job_name: jupyter
+  #   static_configs: 
+  #     - targets: ["jupyter:8888"]
 
-  - job_name: lighthoust_testnet
-    static_configs:
-      - targets: ["lighthouse_testnet:5054"]
+  # - job_name: lighthoust_testnet
+  #   static_configs:
+  #     - targets: ["lighthouse_testnet:5054"]
 
   - job_name: miniflux
     scrape_interval: 10m
@@ -73,13 +73,13 @@ scrape_configs:
   #   static_configs:
   #     - targets: ["prysm_mainnet_validator_1:8081"]
 
-  - job_name: prysm_testnet_beacon
-    static_configs:
-      - targets: ["prysm_testnet_beacon_1:8080"]
+  # - job_name: prysm_testnet_beacon
+  #   static_configs:
+  #     - targets: ["prysm_testnet_beacon_1:8080"]
 
-  - job_name: prysm_testnet_validator
-    static_configs:
-      - targets: ["prysm_testnet_validator_1:8081"]
+  # - job_name: prysm_testnet_validator
+  #   static_configs:
+  #     - targets: ["prysm_testnet_validator_1:8081"]
 
   - job_name: speedtest
     scrape_interval: 30m
