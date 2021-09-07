@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: tick
+    name: influx
 
   grafana:
     external:
@@ -53,9 +53,9 @@ services:
     image: influxdb:2.0
     restart: unless-stopped
     environment:
-      # INFLUXD_LOG_LEVEL: debug
       INFLUX_PASSWORD: "${INFLUX_PASSWORD}"
       INFLUX_USERNAME: "${INFLUX_USERNAME}"
+      INFLUXD_LOG_LEVEL: debug
       INFLUXD_REPORTING_DISABLED: "true"
     labels:
       traefik.enable: true
