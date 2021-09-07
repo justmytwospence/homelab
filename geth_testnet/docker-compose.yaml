@@ -21,7 +21,6 @@ services:
       - --goerli # testnet
       - --http
       - --http.addr=0.0.0.0
-      - --http.corsdomain=moz-extension://0d6948d6-4cab-4438-83f5-b74012565eb3 # MetaMask
       - --http.port=8546 # default 8545
       - --http.vhosts=geth_testnet
       - --identity=${IDENTITY}
