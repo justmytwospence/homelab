@@ -43,7 +43,7 @@ services:
       AUTHELIA_SESSION_EXPIRATION: 3600 # 1 hour
       AUTHELIA_SESSION_INACTIVITY: 300 # 5 minutes
       AUTHELIA_SESSION_NAME: authelia_session
-      AUTHELIA_SESSION_REDIS_HOST: authelia-redis
+      AUTHELIA_SESSION_REDIS_HOST: authelia_redis
       AUTHELIA_SESSION_REDIS_PORT: 6379
       AUTHELIA_SESSION_SECRET_FILE: /config/secrets/session
       AUTHELIA_STORAGE_LOCAL_PATH: /config/db.sqlite3
@@ -74,9 +74,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  error-pages:
+  error_pages:
     image: tarampampam/error-pages:1.7.1
-    container_name: traefik-error-pages
+    container_name: traefik_error_pages
     restart: unless-stopped
     environment:
       TEMPLATE_NAME: l7-dark
@@ -108,10 +108,10 @@ services:
       - default
       - prometheus
     volumes:
-      - jaeger-tmp:/tmp
+      - jaeger_tmp:/tmp
 
   redis:
-    container_name: authelia-redis
+    container_name: authelia_redis
     image: redis:6.2.1
     restart: unless-stopped
     environment:
@@ -123,6 +123,8 @@ services:
 
   traefik:
     container_name: traefik
+    dns:
+      - 8.8.8.8
     image: traefik:v2.4
     restart: unless-stopped
     depends_on:
@@ -130,7 +132,7 @@ services:
         condition: service_healthy
       docker-proxy:
         condition: service_started
-      error-pages:
+      error_pages:
         condition: service_started
     healthcheck:
       test: ["CMD", "traefik", "healthcheck" ]
@@ -179,15 +181,8 @@ services:
       TRAEFIK_PROVIDERS_DOCKER_WATCH: "true"
       # file provider
       DOMAIN: "${DOMAIN}"
-      OPNSENSE_IP: "${OPNSENSE_IP}"
-      QNAP_IP: "${QNAP_IP}"
       TRAEFIK_PROVIDERS_FILE_DIRECTORY: /dynamic
       TRAEFIK_PROVIDERS_FILE_WATCH: "true"
-      # consul provider
-      # TRAEFIK_PROVIDERS_CONSUL_ENDPOINTS: 127.0.0.1:8500
-      # TRAEFIK_PROVIDERS_CONSUL_PASSWORD:
-      # TRAEFIK_PROVIDERS_CONSUL_USERNAME:
-      # TRAEFIK_PROVIDERS_CONSULCATALOG_ENDPOINT_ADDRESS: 127.0.0.1:8500
     labels:
       traefik.enable: true
       # dashboard
@@ -215,7 +210,4 @@ services:
 volumes:
 
   redis:
-    name: authelia-redis
-
-  jaeger-tmp:
-    name: jaeger-tmp
+  jaeger_tmp:
