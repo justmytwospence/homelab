@@ -101,4 +101,3 @@ volumes:
       type: nfs
 
   redis:
-    name: nextcloud-redis
