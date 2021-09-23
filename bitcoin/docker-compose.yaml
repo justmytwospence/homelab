@@ -26,7 +26,7 @@ services:
         max-size: 200k
         max-file: "10"
     ports:
-      # - 8332:8332 # rpc
+      - 8332:8332 # rpc
       - 8333:8333 # p2p
     volumes:
       - ./bitcoin.conf:/bitcoin/.bitcoin/bitcoin.conf
@@ -47,19 +47,22 @@ services:
           cpus: 2
           memory: 4G
     environment:
-      ELECTRS_COOKIE_FILE: /shared/.cookie
+      # ELECTRS_COOKIE_FILE: /shared/.cookie
       ELECTRS_DAEMON_RPC_ADDR: bitcoind:8332
       ELECTRS_DB_DIR: /db
       ELECTRS_ELECTRUM_RPC_ADDR: 0.0.0.0:51001
       ELECTRS_JSONRPC_IMPORT: "true"
       ELECTRS_MONITORING_ADDR: 0.0.0.0:4224
       ELECTRS_VERBOSE: 4
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
     networks:
       - default
       - prometheus
     ports:
       - 51001:51001
     volumes:
+      - ./electrs:/etc/electrs
       - ./shared:/shared
       - electrs:/db
 
