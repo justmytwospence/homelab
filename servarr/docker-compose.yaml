@@ -93,7 +93,7 @@ services:
     volumes:
       - ./radarr:/config
       - multimedia:/multimedia
-      - ~/downloads:/downloads
+      - downloads:/downloads
 
   sonarr:
     container_name: sonarr
@@ -119,9 +119,13 @@ services:
     volumes:
       - ./sonarr:/config
       - multimedia:/multimedia
-      - ~/downloads:/downloads
+      - downloads:/downloads
 
 volumes:
+
+  downloads:
+    external: true
+    name: downloads
 
   multimedia:
     driver: local

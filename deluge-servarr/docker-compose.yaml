@@ -33,7 +33,7 @@ services:
       traefik.http.services.deluge-servarr.loadbalancer.server.port: 8112
     volumes:
       - ./deluge:/config
-      - ~/downloads:/downloads
+      - downloads:/downloads
 
   gluetun:
     container_name: servarr-vpn
@@ -65,3 +65,8 @@ services:
       - 58846:58846 # deluge
     volumes:
       - ./gluetun:/gluetun
+
+volumes:
+
+  downloads:
+    name: downloads
