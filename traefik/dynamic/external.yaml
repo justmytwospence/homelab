@@ -20,7 +20,7 @@ http:
     homeassistant:
       loadBalancer:
         servers:
-          - url: http://homeassistant.lan:8123
+          - url: http://hass.lan:8123
 
     netdata:
       loadBalancer:
