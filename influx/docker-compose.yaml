@@ -69,8 +69,8 @@ services:
       - 8086:8086 # needed because telegraf is on host network
     volumes:
       - /var/log/influxdb:/var/log
-      - influxdb-etc:/etc/influxdb2
-      - influxdb-lib:/var/lib/influxdb2
+      - influxdb_etc:/etc/influxdb2
+      - influxdb_lib:/var/lib/influxdb2
 
   # kapacitor:
   #   container_name: kapacitor
@@ -110,13 +110,6 @@ services:
 volumes:
 
   chronograf:
-    name: chronograf
-
-  influxdb-etc:
-    name: influxdb-etc
-
-  influxdb-lib:
-    name: influxdb-lib
-
+  influxdb_etc:
+  influxdb_lib:
   kapacitor:
-    name: kapacitor

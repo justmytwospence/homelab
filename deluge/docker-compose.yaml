@@ -37,7 +37,7 @@ services:
       - ./config:/config
       - ./downloads:/downloads
       - ./torrents:/torrents
-      - distros:/downloads/distros
+      - distros:/distros
 
 volumes:
 

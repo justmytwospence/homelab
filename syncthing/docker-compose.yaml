@@ -25,6 +25,7 @@ services:
       TZ: "${TZ}"
     labels:
       traefik.enable: true
+      traefik.http.routers.syncthing.middlewares: authelia
       traefik.http.services.syncthing.loadbalancer.server.port: 8384
     networks:
       - default
@@ -35,14 +36,3 @@ services:
       - 22000:22000/udp
     volumes:
       - ./config:/var/syncthing
-      - android:/var/syncthing/android
-
-volumes:
-
-  android:
-    driver: local
-    name: android
-    driver_opts:
-      device: :/Android
-      o: addr=192.168.1.3,nfsvers=4,rw
-      type: nfs
