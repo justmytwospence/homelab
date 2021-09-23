@@ -20,6 +20,8 @@ services:
       MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_USER: "${MYSQL_USER}"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-u", "root", "-p", "${PASSWORD}" ]
     volumes:
       - ./db:/var/lib/mysql
 
