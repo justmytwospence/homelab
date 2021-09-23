@@ -52,7 +52,7 @@ services:
     environment:
       GID: "${GUID}"
       PHOTOPRISM_ADMIN_PASSWORD: "${PASSWORD}"
-      PHOTOPRISM_AUTO_IMPORT: 60 # seconds
+      PHOTOPRISM_AUTO_IMPORT: 900 # default 900 seconds
       PHOTOPRISM_DATABASE_DRIVER: mysql
       PHOTOPRISM_DATABASE_NAME: photoprism
       PHOTOPRISM_DATABASE_PASSWORD: "${PASSWORD}"
@@ -81,20 +81,21 @@ services:
       - nextcloud
       - traefik
     volumes:
-      # PhotoSync/Dolphin -> webdav -> import -> photos -> webdav -> nextcloud share
+      # PhotoSync/Dolphin -> webdav -> import -> photos -> webdav -> Nextcloud share
       - ./storage:/photoprism/storage # sidecar files (local)
       - import:/photoprism/import # import (local)
       - originals:/photoprism/originals # permanent files (NAS)
+      - var_lib:/var/lib/photoprism
 
 volumes:
 
+  import:
+
   originals:
     driver: local
-    name: photoprism-originals
     driver_opts:
       device: :/Photos/photoprism
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs
 
-  import:
-    name: photoprism-import
+  var_lib:
