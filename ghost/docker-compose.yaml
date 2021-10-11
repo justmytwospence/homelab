@@ -21,7 +21,7 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_USER: ghost
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-u", "root", "-p", "${PASSWORD}" ]
+      test: [ "CMD", "mysqladmin", "ping", "-u", "ghost", "-p${PASSWORD}" ]
     volumes:
       - ./db:/var/lib/mysql
 
