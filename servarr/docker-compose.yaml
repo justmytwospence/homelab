@@ -92,8 +92,8 @@ services:
       - traefik
     volumes:
       - ./radarr:/config
-      - multimedia:/multimedia
       - downloads:/downloads
+      - multimedia:/multimedia
 
   sonarr:
     container_name: sonarr
@@ -118,8 +118,8 @@ services:
       - traefik
     volumes:
       - ./sonarr:/config
-      - multimedia:/multimedia
       - downloads:/downloads
+      - multimedia:/multimedia
 
 volumes:
 
@@ -131,6 +131,6 @@ volumes:
     driver: local
     name: multimedia
     driver_opts:
-      device: :/Multimedia
+      device: :/Media
       o: addr=192.168.1.3,nfsvers=4,rw
       type: nfs

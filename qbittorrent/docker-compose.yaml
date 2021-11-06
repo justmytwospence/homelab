@@ -3,7 +3,7 @@ version: "3"
 networks:
 
   default:
-    name: deluge-servarr
+    name: qbittorrent
 
   traefik:
     external:
@@ -11,9 +11,9 @@ networks:
 
 services:
 
-  deluge:
-    container_name: deluge-servarr
-    image: linuxserver/deluge:latest
+  qbittorrent:
+    container_name: qbittorrent
+    image: linuxserver/qbittorrent:latest
     network_mode: "service:gluetun"
     restart: unless-stopped
     deploy:
@@ -22,21 +22,19 @@ services:
           cpus: 1
           memory: 4G
     environment:
-      DELUGE_LOGLEVEL: INFO
       PGID: "${PGID}"
       PUID: "${PUID}"
       TZ: "${TZ}"
     labels:
       traefik.enable: true
-      traefik.http.routers.deluge-servarr.rule: "Host(`servarr.${DOMAIN}`)"
-      traefik.http.routers.deluge-servarr.middlewares: error-pages
-      traefik.http.services.deluge-servarr.loadbalancer.server.port: 8112
+      traefik.http.routers.qbittorrent.middlewares: error-pages
+      traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
     volumes:
-      - ./deluge:/config
+      - ./qbittorrent:/config
       - downloads:/downloads
 
   gluetun:
-    container_name: servarr-vpn
+    container_name: qbittorrent-vpn
     image: qmcgaw/gluetun:v3.18.0
     restart: unless-stopped
     cap_add:
@@ -62,7 +60,8 @@ services:
       - default
       - traefik
     ports:
-      - 58846:58846 # deluge
+      - 6881:6881
+      - 6881:6881/udp
     volumes:
       - ./gluetun:/gluetun
 

@@ -1,0 +1,71 @@
+version: "3"
+
+networks:
+
+  default:
+    name: deluge-servarr
+
+  traefik:
+    external:
+      name: traefik
+
+services:
+
+  deluge:
+    container_name: deluge-servarr
+    image: linuxserver/deluge:latest
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 4G
+    environment:
+      DELUGE_LOGLEVEL: INFO
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      TZ: "${TZ}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.deluge-servarr.middlewares: error-pages
+      traefik.http.services.deluge-servarr.loadbalancer.server.port: 8112
+    volumes:
+      - ./deluge:/config
+      - downloads:/downloads
+
+  gluetun:
+    container_name: deluge-vpn
+    image: qmcgaw/gluetun:v3.18.0
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    environment:
+      BLOCK_ADS: "on"
+      BLOCK_MALICIOUS: "on"
+      BLOCK_SURVEILLANCE: "on"
+      DOT: "on"
+      DOT_CACHING: "on"
+      DOT_PROVIDERS: quad9
+      FIREWALL: "on"
+      FIREWALL_INPUT_PORTS: 9091
+      FIREWALL_VPN_INPUT_PORTS: "${TORRENT_PORT_FORWARD}"
+      OPENVPN_USER: "${OPENVPN_USER}"
+      OPENVPN_VERBOSITY: 2
+      PGID: "${PGID}"
+      PUID: "${PUID}"
+      SERVER_HOSTNAME: "${SERVER_HOSTNAME}"
+      TZ: "${TZ}"
+      VPNSP: mullvad
+    networks:
+      - default
+      - traefik
+    ports:
+      - 58846:58846 # deluge
+    volumes:
+      - ./gluetun:/gluetun
+
+volumes:
+
+  downloads:
+    name: downloads
