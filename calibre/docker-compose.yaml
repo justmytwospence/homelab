@@ -36,7 +36,7 @@ services:
       - default
       - traefik
     ports:
-      - 8080:8080 # server
+      - 8081:8081 # server
       - 9090:9090 # local discovery
     volumes:
       - ./calibre:/config

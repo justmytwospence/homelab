@@ -27,7 +27,7 @@ services:
       TZ: "${TZ}"
     labels:
       traefik.enable: true
-      traefik.http.routers.qbittorrent.middlewares: error-pages
+      traefik.http.routers.qbittorrent.middlewares: authelia, error-pages
       traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
     volumes:
       - ./qbittorrent:/config
@@ -62,6 +62,7 @@ services:
     ports:
       - 6881:6881
       - 6881:6881/udp
+      - 8080:8080
     volumes:
       - ./gluetun:/gluetun
 
