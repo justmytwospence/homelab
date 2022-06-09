@@ -36,6 +36,7 @@ services:
       DOCKER_HOST: tcp://watchtower-docker-proxy:2375
       TZ: "${TZ}"
       WATCHTOWER_CLEANUP: "false"
+      WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_DEBUG: "false"
       WATCHTOWER_HTTP_API_METRICS: "true"
       WATCHTOWER_HTTP_API_TOKEN: "${HTTP_API_TOKEN}"
