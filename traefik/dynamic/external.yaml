@@ -8,7 +8,9 @@ http:
 
     netdata:
       rule: Host(`netdata.{{ env "DOMAIN" }}`)
-      middlewares: authelia@docker, error-pages@docker
+      middlewares:
+        - authelia@docker
+        - error-pages@docker
       service: netdata
 
     plex:
