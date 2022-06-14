@@ -124,7 +124,7 @@ services:
 
   traefik:
     container_name: traefik
-    image: traefik:v2.4
+    image: traefik:v2.6
     restart: unless-stopped
     depends_on:
       authelia:
