@@ -51,6 +51,24 @@ services:
     volumes:
       - ./jackett:/config
 
+  overseerr:
+    container_name: overseerr
+    image: lscr.io/linuxserver/overseerr:latest
+    restart: unless-stopped
+    environment:
+      PUID: "${PGID}"
+      PGID: "${PGID}"
+      TZ: "${TZ}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.overseer.middlewares: authelia, error-pages
+      traefik.http.services.overseer.loadbalancer.server.port: 5055
+    networks:
+      - default
+      - traefik
+    volumes:
+      - ./overseer:/config
+
   prowlarr:
     container_name: prowlarr
     image: linuxserver/prowlarr:nightly
