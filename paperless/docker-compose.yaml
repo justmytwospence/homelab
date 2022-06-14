@@ -1,0 +1,65 @@
+version: "3"
+
+networks:
+
+  default:
+    name: paperless
+
+  traefik:
+    external:
+      name: traefik
+
+services:
+
+  broker:
+    container_name: paperless-redis
+    image: redis:6.0
+    restart: unless-stopped
+
+  db:
+    container_name: paperless-db
+    image: postgres:13
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  paperless:
+    container_name: paperless
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+    environment:
+      PAPERLESS_ADMIN_PASSWORD: "${PAPERLESS_ADMIN_PASSWORD}"
+      PAPERLESS_ADMIN_USER: "${PAPERLESS_ADMIN_USER}"
+      PAPERLESS_DBHOST: db
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_TIME_ZONE: "${TZ}"
+      PAPERLESS_URL: "${PAPERLESS_URL}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    labels:
+      traefik.enable: true
+      traefik.http.routers.paperless.middlewares: authelia, error-pages
+      traefik.http.services.paperless.loadbalancer.server.port: 8000
+    networks:
+      - default
+      - traefik
+    volumes:
+      - ./consume:/usr/src/paperless/consume
+      - ./export:/usr/src/paperless/export
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media
+
+volumes:
+  data:
+  media:
+  pgdata:
