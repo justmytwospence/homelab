@@ -32,8 +32,8 @@ services:
       - db
     labels:
       traefik.enable: true
-      # traefik.http.routers.servas.middlewares: authelia, error-pages
-      # traefik.http.routers.servas-api.rule: Host(`servas.${DOMAIN}`) && PathPrefix(`/api`)
+      traefik.http.routers.servas.middlewares: authelia, error-pages
+      traefik.http.routers.servas-api.rule: Host(`servas.${DOMAIN}`) && PathPrefix(`/api`)
       traefik.http.services.servas.loadbalancer.server.port: 80
     networks:
       - default
