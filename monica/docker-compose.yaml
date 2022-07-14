@@ -37,11 +37,11 @@ services:
       MAIL_FROM_NAME: MonicaHQ
       POLICY_COMPLIANT: "false"
     labels:
-      # traefik.http.routers.monica.middlewares: authelia, error-pages
       flame.name: Monica
       flame.type: application
       flame.url: https://monica.${DOMAIN}
       traefik.enable: true
+      traefik.http.routers.monica.middlewares: authelia, error-pages
       traefik.http.services.monica.loadbalancer.server.port: 80
     ports:
       - 3030:80
