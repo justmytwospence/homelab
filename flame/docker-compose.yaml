@@ -1,0 +1,29 @@
+version: "3"
+
+networks:
+
+  default:
+    name: flame
+
+  traefik:
+    external:
+      name: traefik
+
+services:
+
+  flame:
+    container_name: flame
+    image: pawelmalak/flame:latest
+    restart: unless-stopped
+    environment:
+      PASSWORD: "${PASSWORD}"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.flame.middlewares: authelia, error-pages
+      traefik.http.services.flame.loadbalancer.server.port: 5005
+    networks:
+      - default
+      - traefik
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
