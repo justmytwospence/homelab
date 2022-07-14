@@ -1,0 +1,71 @@
+version: "3"
+
+networks:
+
+  default:
+    name: linkace
+
+  traefik:
+    external:
+      name: traefik
+
+services:
+
+  db:
+    container_name: linkace-db
+    image: mariadb:10.7
+    restart: unless-stopped
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_USER: "${DB_USERNAME}"
+    volumes:
+      - db:/var/lib/mysql
+
+  app:
+    container_name: linkace
+    image: linkace/linkace:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes:
+      - ./.env:/app/.env
+      - linkace_app:/app
+      - /var/log/linkace:/app/storage/logs
+      #- ./backups:/app/storage/app/backups
+
+  nginx:
+    container_name: linkace-nginx
+    image: bitnami/nginx:1.21
+    restart: unless-stopped
+    depends_on:
+      - app
+    labels:
+      flame.name: LinkAce
+      flame.type: application
+      flame.url: https://linkace.${DOMAIN}
+      traefik.enable: true
+      traefik.http.routers.linkace.middlewares: authelia, error-pages
+      traefik.http.routers.linkace.rule: Host(`linkace.${DOMAIN}`)
+      traefik.http.services.linkace.loadbalancer.server.port: 8080
+    networks:
+      - default
+      - traefik
+    volumes:
+      - linkace_app:/app
+      - ./nginx.conf:/opt/bitnami/nginx/conf/server_blocks/linkace.conf:ro
+
+  redis:
+    container_name: linkace-redis
+    image: bitnami/redis:6.2
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+
+volumes:
+  linkace_app:
+  db:
+    driver: local
+
