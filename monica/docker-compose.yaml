@@ -1,0 +1,70 @@
+version: "3"
+
+networks:
+
+  default:
+    name: monica
+
+  traefik:
+    external:
+      name: traefik
+
+services:
+
+  monica:
+    container_name: monica
+    image: monica:latest
+    restart: always
+    depends_on:
+      - db
+    environment:
+      ALLOW_STATISTICS_THROUGH_PUBLIC_API_ACCESS: false
+      APP_DEBUG: "true"
+      APP_DISABLE_SIGNUP: "true"
+      APP_ENV: production
+      APP_TRUSTED_PROXIES: "*"
+      APP_URL: https://monica.${DOMAIN}
+      CHECK_VERSION: "true"
+      DAV_ENABLED: "true"
+      DB_CONNECTION: mysql
+      DB_DATABASE: monica
+      DB_HOST: db
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_PORT: 3306
+      DB_USERNAME: monica
+      DEFAULT_MAX_STORAGE_SIZE: 512
+      DEFAULT_MAX_UPLOAD_SIZE: 10240
+      MAIL_FROM_NAME: MonicaHQ
+      POLICY_COMPLIANT: "false"
+    labels:
+      # traefik.http.routers.monica.middlewares: authelia, error-pages
+      flame.name: Monica
+      flame.type: application
+      flame.url: https://monica.${DOMAIN}
+      traefik.enable: true
+      traefik.http.services.monica.loadbalancer.server.port: 80
+    ports:
+      - 3030:80
+    networks:
+      - default
+      - traefik
+    volumes:
+      - data:/var/www/html/storage
+
+  db:
+    container_name: monica-db
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: monica
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_USER: monica
+    volumes:
+      - mysql:/var/lib/mysql
+
+volumes:
+  data:
+    name: monica-data
+  mysql:
+    name: monica-db
