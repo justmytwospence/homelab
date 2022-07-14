@@ -18,7 +18,7 @@ services:
     depends_on:
       - db
     environment:
-      ALLOW_STATISTICS_THROUGH_PUBLIC_API_ACCESS: false
+      ALLOW_STATISTICS_THROUGH_PUBLIC_API_ACCESS: "false"
       APP_DEBUG: "true"
       APP_DISABLE_SIGNUP: "true"
       APP_ENV: production
